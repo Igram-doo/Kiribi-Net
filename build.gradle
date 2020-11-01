@@ -1,0 +1,45 @@
+plugins {
+    id 'java-library'
+}
+
+repositories {
+		jcenter()
+}
+	
+dependencies {
+	testImplementation 'junit:junit:4.12'
+}
+
+git {
+    implementation 'https://github.com/Igram-doo/Kiribi-IO.git', {
+        tag 'main'
+    }
+    implementation 'https://github.com/Igram-doo/Kiribi-Crypto.git', {
+        tag 'main'
+    }
+    implementation 'https://github.com/Igram-doo/Kiribi-Concurrent.git', {
+        tag 'main'
+    }
+}
+
+java {
+    modularity.inferModulePath = true
+}  
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+            exclude 'test/**'
+       }
+   }
+}
+
+javadoc {
+    options {
+    	links = ["https://docs.oracle.com/en/java/javase/15/docs/api/"]
+    }
+}
+
+group = 'rs.igram.kiribi'
+version = 'v0.1-beta'
