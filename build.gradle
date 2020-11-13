@@ -7,17 +7,23 @@ repositories {
 }
 	
 dependencies {
-	testImplementation 'junit:junit:4.12'
+	testImplementation(platform('org.junit:junit-bom:5.7.0'))
+	testImplementation('org.junit.jupiter:junit-jupiter')
+}
+
+test {
+	useJUnitPlatform()
+	testLogging {
+		events "passed", "skipped", "failed"
+	}
 }
 
 git {
     implementation 'https://github.com/Igram-doo/Kiribi-IO.git', {
         tag 'main'
     }
+    
     implementation 'https://github.com/Igram-doo/Kiribi-Crypto.git', {
-        tag 'main'
-    }
-    implementation 'https://github.com/Igram-doo/Kiribi-Concurrent.git', {
         tag 'main'
     }
 }
@@ -39,6 +45,11 @@ javadoc {
     options {
     	links = ["https://docs.oracle.com/en/java/javase/15/docs/api/"]
     }
+   
+    //exclude 'src/main/java/rs/igram/kiribi/net/stack/**'
+    //exclude 'src/main/java/rs/igram/kiribi/net/**'
+    
+    //include 'src/main/java/rs/igram/kiribi/net/natt/**'
 }
 
 group = 'rs.igram.kiribi'
