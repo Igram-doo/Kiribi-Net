@@ -92,7 +92,7 @@ public class NetworkExecutor {
 	}
 	
 	/**
-	 * Returns a future associated with the provided task.
+	 * Submits the provided task for execution.
 	 *
 	 * @param <T> The generic type of the task.
 	 * @param task The task to run.
@@ -104,7 +104,7 @@ public class NetworkExecutor {
 	}
 
 	/**
-	 * Returns a future associated with the provided task.
+	 * Submits the provided task for execution.
 	 *
 	 * @param task The task to run.
 	 * @return Returns a future associated with the provided task.
@@ -115,7 +115,7 @@ public class NetworkExecutor {
 	}
 	
 	/**
-	 * Returns a scheduled future associated with the provided task.
+	 * Schedules the provided task for execution.
 	 *
 	 * @param <T> The generic type of the task.
 	 * @param task The task to run.
@@ -128,7 +128,7 @@ public class NetworkExecutor {
 	}
 
 	/**
-	 * Returns a scheduled future associated with the provided task.
+	 * Schedules the provided task for execution.
 	 *
 	 * @param task The task to run.
 	 * @param delay The delay.
@@ -140,7 +140,7 @@ public class NetworkExecutor {
 	}
 	
 	/**
-	 * Returns a scheduled future associated with the provided task.
+	 * Schedules the provided task for execution.
 	 *
 	 * @param task The task to run.
 	 * @param initialDelay The initial delay.
@@ -153,7 +153,7 @@ public class NetworkExecutor {
 	}
 	
 	/**
-	 * Returns a scheduled future associated with the provided task.
+	 * Schedules the provided task for execution.
 	 *
 	 * @param task The task to run.
 	 * @param initialDelay The initial delay.
