@@ -53,16 +53,19 @@ public class NetworkExecutorTest {
 
    @Test
    public void testSubmit() throws IOException, InterruptedException {
+   	   // todo
    	   assertTrue(true);
    }
 
    @Test
    public void testSchedule() throws IOException, InterruptedException {
+   	   // todo
    	   assertTrue(true);
    }
 
    @Test
    public void testOnShutdown() throws IOException, InterruptedException {
+   	   // todo
    	   assertTrue(true);
    }
 }
