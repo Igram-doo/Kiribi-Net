@@ -9,6 +9,18 @@ repositories {
 dependencies {
 	testImplementation(platform('org.junit:junit-bom:5.7.0'))
 	testImplementation('org.junit.jupiter:junit-jupiter')
+	
+	implementation('rs.igram.kiribi:kiribi-io') {
+		version {
+			branch = 'main'
+		}
+	}
+	
+	implementation('rs.igram.kiribi:kiribi-crypto') {
+		version {
+			branch = 'main'
+		}
+	}
 }
 
 test {
@@ -16,16 +28,6 @@ test {
 	testLogging {
 		events "passed", "skipped", "failed"
 	}
-}
-
-git {
-    implementation 'https://github.com/Igram-doo/Kiribi-IO.git', {
-        tag 'main'
-    }
-    
-    implementation 'https://github.com/Igram-doo/Kiribi-Crypto.git', {
-        tag 'main'
-    }
 }
 
 java {

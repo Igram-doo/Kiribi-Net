@@ -1,5 +1,10 @@
-plugins {
-    id 'com.alexvasilkov.git-dependencies' version '2.0.1'
+sourceControl {
+    gitRepository("https://github.com/Igram-doo/Kiribi-IO.git") {
+        producesModule("rs.igram.kiribi:kiribi-io")
+    }
+    gitRepository("https://github.com/Igram-doo/Kiribi-Crypto.git") {
+        producesModule("rs.igram.kiribi:kiribi-crypto")
+    }
 }
 
 rootProject.name = 'kiribi-net'
