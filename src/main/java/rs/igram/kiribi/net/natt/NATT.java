@@ -51,7 +51,7 @@ import static rs.igram.kiribi.io.ByteUtils.*;
  *
  * @author Michael Sargent
  */
-public abstract class NATT {
+abstract class NATT {
 	static final byte NATT_PROTOCOL = 1; // natt protocol
 	static final byte KAP_PROTOCOL	= 2; // keep alive protocol
 	static final byte RMP_PROTOCOL	= 3; // rmp protocol

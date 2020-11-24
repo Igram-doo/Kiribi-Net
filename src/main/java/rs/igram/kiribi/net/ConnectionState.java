@@ -30,7 +30,7 @@ package rs.igram.kiribi.net;
  * @author Michael Sargent
  */
 public enum ConnectionState {
-	/** Indicates the connection has been initialized bu is not yet active. */
+	/** Indicates the connection has been initialized but is not yet active. */
 	INIT,
 	/** Indicates the connection is active. */
 	ACTIVE,
