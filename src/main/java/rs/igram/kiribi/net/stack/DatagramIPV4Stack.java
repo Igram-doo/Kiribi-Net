@@ -37,7 +37,6 @@ import java.util.function.Consumer;
 import java.util.function.BiConsumer;
 
 import rs.igram.kiribi.crypto.Address;
-import rs.igram.kiribi.crypto.Key;
 import rs.igram.kiribi.net.NetworkExecutor;
 import rs.igram.kiribi.net.stack.kap.KAPProcessor;
 import rs.igram.kiribi.net.stack.natt.NATTProcessor;
@@ -56,10 +55,10 @@ public final class DatagramIPV4Stack extends DatagramStack {
 	Consumer<Set<SocketAddress>> onExpired;
 	Consumer<NATTProcessor.SessionEvent> listener;
 	NATTProcessor natt;
-	
-	public DatagramIPV4Stack(NetworkExecutor executor, Key key, SocketAddress serverAddress, int port, BiConsumer<SocketAddress,byte[]> consumer, 
+	 
+	public DatagramIPV4Stack(NetworkExecutor executor, Address address, SocketAddress serverAddress, int port, BiConsumer<SocketAddress,byte[]> consumer, 
 		Consumer<SocketAddress> onIncoming, Consumer<Set<SocketAddress>> onExpired) {
-		super(executor, key, serverAddress, StandardProtocolFamily.INET, port, consumer);
+		super(executor, address, serverAddress, StandardProtocolFamily.INET, port, consumer);
 	}
 
 	@Override

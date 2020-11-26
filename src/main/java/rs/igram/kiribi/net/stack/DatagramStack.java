@@ -35,7 +35,6 @@ import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
 
 import rs.igram.kiribi.crypto.Address;
-import rs.igram.kiribi.crypto.Key;
 import rs.igram.kiribi.net.NetworkExecutor;
 import rs.igram.kiribi.net.NetworkMonitor;
 import rs.igram.kiribi.net.stack.kap.KAPProcessor;
@@ -51,15 +50,16 @@ public abstract class DatagramStack {
 	
 	protected final StandardProtocolFamily protocol;
 	protected final NetworkMux mux;
-	protected final Key key;
+	protected final Address address;
 	protected final SocketAddress serverAddress;
 	protected final int port;
 	protected final BiConsumer<SocketAddress,byte[]> consumer;
 	protected KAPProcessor kap;
 	protected RMPProcessor rmp;
-	
-	protected DatagramStack(NetworkExecutor executor, Key key, SocketAddress serverAddress, StandardProtocolFamily protocol, int port, BiConsumer<SocketAddress,byte[]> consumer) {	
-		this.key = key;
+		
+	protected DatagramStack(NetworkExecutor executor, Address address, SocketAddress serverAddress, StandardProtocolFamily protocol, int port, BiConsumer<SocketAddress,byte[]> consumer) {	
+//		this.key = key;
+		this.address = address;
 		this.serverAddress = serverAddress;
 		this.protocol = protocol;
 		this.port = port;
@@ -101,7 +101,7 @@ public abstract class DatagramStack {
 	}
 
 	public void register() throws IOException {
-		register(key.address(), new InetSocketAddress(NetworkMonitor.inet(), port));
+		register(address, new InetSocketAddress(NetworkMonitor.inet(), port));
 	}
 
 	public abstract SocketAddress connect(Address address) throws IOException;

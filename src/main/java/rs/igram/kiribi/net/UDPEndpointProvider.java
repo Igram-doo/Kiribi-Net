@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 
 import rs.igram.kiribi.crypto.Address;
 import rs.igram.kiribi.crypto.Challenge;
-import rs.igram.kiribi.crypto.Key;
+//import rs.igram.kiribi.crypto.Key;
 import rs.igram.kiribi.crypto.KeyExchange;
 import rs.igram.kiribi.crypto.SignedData;
 import rs.igram.kiribi.io.ByteStream;
@@ -87,7 +87,7 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 
 	final Object lock = new Object(){};
 	final SocketAddress serverAddress;
-	final Key key;
+	final Address address;
 	final Map<SocketAddress,Address> addresses = new HashMap<>();
 	final Map<SocketAddress,Mux> muxes = new HashMap<>();
 	final Map<Address,Mux> map = new HashMap<>();
@@ -107,13 +107,13 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 	private boolean initialized = false;
 	private int port = -1;
 	
-	public UDPEndpointProvider(NetworkExecutor executor, Key key, SocketAddress serverAddress) {
+	public UDPEndpointProvider(NetworkExecutor executor, Address address, SocketAddress serverAddress) {
 		super(executor);
 		
-		this.key = key;
+		this.address = address;
 		this.serverAddress = serverAddress;
 		
-		me = key.pub().address();
+		me = address;
 	}
 
 	private void start(int port) {
@@ -121,7 +121,7 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 	}
 
 	private void startIPV4(int port) {
-		stack = new DatagramIPV4Stack(executor, key, serverAddress, port, (s,b) -> accept(s, b), this::onIncoming, this::onExpired);
+		stack = new DatagramIPV4Stack(executor, address, serverAddress, port, (s,b) -> accept(s, b), this::onIncoming, this::onExpired);
 		stack.configure();
 		stack.start();
 			

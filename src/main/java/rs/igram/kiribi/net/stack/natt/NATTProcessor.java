@@ -45,7 +45,7 @@ import java.util.function.Consumer;
 import rs.igram.kiribi.net.stack.Processor;
 import rs.igram.kiribi.net.stack.NetworkProtocol;
 import rs.igram.kiribi.crypto.Address;
-import rs.igram.kiribi.crypto.Key;
+//import rs.igram.kiribi.crypto.Key;
 
 import static rs.igram.kiribi.net.stack.NetworkProtocol.*;
 import static rs.igram.kiribi.net.stack.natt.NATTProtocol.SessionState.*;

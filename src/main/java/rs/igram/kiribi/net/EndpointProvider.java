@@ -73,15 +73,29 @@ public abstract class EndpointProvider<A> {
 	/**
 	 * Returns a udp endpoint provider.
 	 *
+	 * @deprecated Use {@link #udpProvider(NetworkExecutor,  Address , SocketAddress)}.
 	 * @param executor The executor the returned endpoint provider will use.
 	 * @param key The key the returned endpoint provider will use.
-	 * @param address The socket address of the NATT server the returned endpoint provider will use.
+	 * @param socketAddress The socket address of the NATT server the returned endpoint provider will use.
 	 * @return Returns a udp endpoint provider.
 	 */
-	public static EndpointProvider<ConnectionAddress> udpProvider(NetworkExecutor executor, Key key, SocketAddress address) {
-		return new UDPEndpointProvider(executor, key, address);
+	@Deprecated
+	public static EndpointProvider<ConnectionAddress> udpProvider(NetworkExecutor executor, Key key, SocketAddress socketAddress) {
+		return new UDPEndpointProvider(executor, key.pub().address(), socketAddress);
 	}
 		
+	/**
+	 * Returns a udp endpoint provider.
+	 *
+	 * @param executor The executor the returned endpoint provider will use.
+	 * @param address The address the returned endpoint provider will use.
+	 * @param socketAddress The socket address of the NATT server the returned endpoint provider will use.
+	 * @return Returns a udp endpoint provider.
+	 */
+	public static EndpointProvider<ConnectionAddress> udpProvider(NetworkExecutor executor, Address address, SocketAddress socketAddress) {
+		return new UDPEndpointProvider(executor, address, socketAddress);
+	}
+	
 	/**
 	 * Returns a tcp endpoint provider.
 	 *
