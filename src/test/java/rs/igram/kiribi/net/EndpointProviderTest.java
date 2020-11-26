@@ -30,6 +30,7 @@ import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,7 +46,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import rs.igram.kiribi.crypto.Key;
+import rs.igram.kiribi.crypto.*;
 import rs.igram.kiribi.io.*;
 import rs.igram.kiribi.net.natt.NATTServer;
 
@@ -73,15 +74,16 @@ public class EndpointProviderTest {
 	public void testUDP() throws IOException, InterruptedException, Exception {
 		int port = 6733;
 		NetworkExecutor executor = new NetworkExecutor();
-		Key key = Key.generate();
+		PublicKey key = Key.generateKeyPair().getPublic();
+		Address address = ((Key.Public)key).address();
 		SocketAddress serverAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), NATTServer.SERVER_PORT);
-		EndpointProvider<ConnectionAddress> provider = EndpointProvider.udpProvider(executor, key, serverAddress);		
-		ConnectionAddress address = new ConnectionAddress(key.address(), 1l);
+		EndpointProvider<ConnectionAddress> provider = EndpointProvider.udpProvider(executor, address, serverAddress);		
+		ConnectionAddress connectionAddress = new ConnectionAddress(address, 1l);
 		
 		NATTServer server = new NATTServer();
    	   	server.start(InetAddress.getByName("127.0.0.1"), NATTServer.SERVER_PORT);
    	   	
-		ProviderTest test = new ProviderTest<ConnectionAddress>(executor, provider, address);
+		ProviderTest test = new ProviderTest<ConnectionAddress>(executor, provider, connectionAddress);
 		test.run(port);
    	   
 		assertTrue(test.openSuccess);
