@@ -43,10 +43,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
 import rs.igram.kiribi.crypto.Address;
-import rs.igram.kiribi.crypto.Challenge;
-//import rs.igram.kiribi.crypto.Key;
 import rs.igram.kiribi.crypto.KeyExchange;
-//import rs.igram.kiribi.crypto.SignedData;
 import rs.igram.kiribi.io.ByteStream;
 import rs.igram.kiribi.io.Decoder;
 import rs.igram.kiribi.io.Encodable;
