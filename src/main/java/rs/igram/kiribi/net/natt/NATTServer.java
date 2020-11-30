@@ -33,7 +33,7 @@ import java.net.UnknownHostException;
 import java.net.*;
 import java.util.*;
 
-import rs.igram.kiribi.crypto.Address;
+import rs.igram.kiribi.net.Address;
 
 /**
  * Simple NATT server.

@@ -41,7 +41,7 @@ import java.util.Enumeration;
 import java.util.*;
 import java.util.concurrent.Future;
 
-import rs.igram.kiribi.crypto.Address;
+import rs.igram.kiribi.net.Address;
 import rs.igram.kiribi.net.NetworkExecutor;
 
 import static rs.igram.kiribi.io.ByteUtils.*;
