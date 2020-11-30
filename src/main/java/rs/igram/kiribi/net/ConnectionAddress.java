@@ -24,7 +24,7 @@
  
 package rs.igram.kiribi.net;
 
-import rs.igram.kiribi.crypto.Address;
+//import rs.igram.kiribi.crypto.Address;
 
 /**
  * An instance of this class represents a UDP connection address.

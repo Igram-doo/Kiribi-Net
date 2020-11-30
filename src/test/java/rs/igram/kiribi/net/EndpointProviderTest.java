@@ -46,7 +46,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import rs.igram.kiribi.crypto.*;
+import rs.igram.kiribi.crypto.EC25519PrivateKey;
+import rs.igram.kiribi.crypto.EC25519PublicKey;
+import rs.igram.kiribi.crypto.KeyPairGenerator;
 import rs.igram.kiribi.io.*;
 import rs.igram.kiribi.net.natt.NATTServer;
 
@@ -75,7 +77,8 @@ public class EndpointProviderTest {
 		int port = 6733;
 		NetworkExecutor executor = new NetworkExecutor();
 		PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
-		Address address = ((EC25519PublicKey)key).address();
+//		Address address = new Address(((EC25519PublicKey)key).hash());
+		Address address = new Address(key);
 		SocketAddress serverAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), NATTServer.SERVER_PORT);
 		EndpointProvider<ConnectionAddress> provider = EndpointProvider.udpProvider(executor, address, serverAddress);		
 		ConnectionAddress connectionAddress = new ConnectionAddress(address, 1l);

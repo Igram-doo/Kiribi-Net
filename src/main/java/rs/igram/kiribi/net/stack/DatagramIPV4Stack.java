@@ -36,7 +36,7 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.BiConsumer;
 
-import rs.igram.kiribi.crypto.Address;
+import rs.igram.kiribi.net.Address;
 import rs.igram.kiribi.net.NetworkExecutor;
 import rs.igram.kiribi.net.stack.kap.KAPProcessor;
 import rs.igram.kiribi.net.stack.natt.NATTProcessor;

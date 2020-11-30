@@ -51,8 +51,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import rs.igram.kiribi.crypto.Address;
-import rs.igram.kiribi.crypto.Challenge;
 import rs.igram.kiribi.crypto.KeyExchange;
 import rs.igram.kiribi.crypto.SignedData;
 import rs.igram.kiribi.io.ByteStream;

@@ -43,7 +43,7 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import rs.igram.kiribi.net.NetworkExecutor;
-import rs.igram.kiribi.crypto.Address;
+import rs.igram.kiribi.net.Address;
 import rs.igram.kiribi.net.NetworkMonitor;
 
 import static rs.igram.kiribi.net.stack.NetworkProtocol.*;
