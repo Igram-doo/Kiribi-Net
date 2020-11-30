@@ -74,8 +74,8 @@ public class EndpointProviderTest {
 	public void testUDP() throws IOException, InterruptedException, Exception {
 		int port = 6733;
 		NetworkExecutor executor = new NetworkExecutor();
-		PublicKey key = Key.generateKeyPair().getPublic();
-		Address address = ((Key.Public)key).address();
+		PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
+		Address address = ((EC25519PublicKey)key).address();
 		SocketAddress serverAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), NATTServer.SERVER_PORT);
 		EndpointProvider<ConnectionAddress> provider = EndpointProvider.udpProvider(executor, address, serverAddress);		
 		ConnectionAddress connectionAddress = new ConnectionAddress(address, 1l);
