@@ -119,8 +119,8 @@ public class NetworkExecutor {
 	 *
 	 * @param <T> The generic type of the task.
 	 * @param task The task to run.
-	 * @param delay The delay.
-	 * @param unit The time unit.
+	 * @param delay The time from now to delay execution.
+	 * @param unit The time unit of the delay parameter.
 	 * @return Returns a scheduled future associated with the provided task.
 	 */
 	public final <T> ScheduledFuture<T> schedule(Callable<T> task, long delay, TimeUnit unit) {
@@ -131,7 +131,7 @@ public class NetworkExecutor {
 	 * Schedules the provided task for execution.
 	 *
 	 * @param task The task to run.
-	 * @param delay The delay.
+	 * @param delay The time from now to delay execution.
 	 * @param unit The time unit.
 	 * @return Returns a scheduled future associated with the provided task.
 	 */
@@ -143,9 +143,9 @@ public class NetworkExecutor {
 	 * Schedules the provided task for execution.
 	 *
 	 * @param task The task to run.
-	 * @param initialDelay The initial delay.
-	 * @param period The period.
-	 * @param unit The time unit.
+	 * @param initialDelay The time to delay first execution.
+	 * @param period The period between successive executions.
+	 * @param unit The time unit of the initialDelay and delay parameters.
 	 * @return Returns a scheduled future associated with the provided task.
 	 */
 	public final ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long initialDelay, long period, TimeUnit unit) {
@@ -156,9 +156,9 @@ public class NetworkExecutor {
 	 * Schedules the provided task for execution.
 	 *
 	 * @param task The task to run.
-	 * @param initialDelay The initial delay.
-	 * @param delay The delay.
-	 * @param unit The time unit.
+	 * @param initialDelay The time to delay first execution.
+	 * @param delay The delay between the termination ofone execution and the commencement of the next.
+	 * @param unit The time unit of the delay parameter.
 	 * @return Returns a scheduled future associated with the provided task.
 	 */
 	public final ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, long initialDelay, long delay, TimeUnit unit) {
