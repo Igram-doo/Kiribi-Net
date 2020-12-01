@@ -6,44 +6,88 @@ Kiribi Network Module
 Provides classes and interfaces to support NAT transversal and peer-to-peer network communication.
 
 ### Features
-
-##### Network
-Each peer only requires a single open upd port on the host device.
-
-##### Security
-Encryption between peers is provided by the [Kiribi-Crypto](http://github.com/Igram-doo/Kiribi-Crypto) module.
+* TCP EndpointProvider.
+* UDP EndpointProvider.
+* The UDP Communication Protocol supports Keep Alive and Reliable Message Transmission.
+* Each UDP peer only requires a single open udp port on the host device. The NAT Transversal Protocol, UDP Communication Protocol and Endpoint Data Transfer Protocol packets are automatically multi-plexed.
+* Encryption between peers is provided by the [Kiribi-Crypto](http://github.com/Igram-doo/Kiribi-Crypto) module.
+* NAT Transversal Server to facilitate UPD Endpoint connection.
 
 ### Overview
 Provides classes and interfaces to support NAT transversal and peer-to-peer network communication.
 
 ##### Addresses
-To do
+Each UDP peer maintains a unique Address. Addresses can be instatiated with a crypto-graphic public key to ensure they are unique.
 
 ##### Endpoints
-To do
+* Endpoint: Provides similar functionality to the standard Java Socket.
+* ServerEndpoint: Provides similar functionality to the standard Java ServerSocket.
 
 ##### Endpoint Providers
-To do
+Factories for creating endpoints. Currently the following two EndpointProviders are implemented:
+
+* TCPEndpointProvider: creates TCP Endpoints
+* UDPEndpointProvider: creates UDP Endpoints
 
 ##### Network Executor
-To do
+Wrapper for a Java ForkJoinPool to facilitate multi-threading.
 
 ##### Network Monitor
-To do
+Provides static methods to monitor network availability.
 
-### Code Example
-To do
+### Code Examples
+##### UDP
+	// The NetworkExecutor to use
+	NetworkExecutor executor = ...
+	// The Address of this peer
+	Address address = ... 
+	// The SocketAddress of the NAT Server
+	SocketAddress serverAddress = ...
+	
+	EndpointProvider<ConnectionAddress> udpProvider = 
+		EndpointProvider.udpProvider(executor, address, serverAddress);
+		
+	// A user defined unique long
+	long id = ...
+	// The Address of the peer we want to connect to
+	Address peer = ...
+	
+	ConnectionAddress connectionAddress = 
+		new ConnectionAddress(peer, id);
+		
+	Endpoint endpoint = udpProvider.open(connectionAddress);
 
+	// The port we want to listen on
+	int port = ...
+	
+	ServerEndpoint serverEndpoint = udpProvider.open(port);
+		
+##### TCP
+	// The NetworkExecutor to use
+	NetworkExecutor executor = ...
+	
+	EndpointProvider<SocketAddress> tcpProvider = 
+		EndpointProvider.tcpProvider(executor);
+		
+	// The SocketAddress of the TCP server we want to connect to
+	SocketAddress socketAddress = ...
+		
+	Endpoint endpoint = tcpProvider.open(socketAddress);
+
+	// The port we want to listen on
+	int port = ...
+	
+	ServerEndpoint serverEndpoint = tcpProvider.open(port);
+	
 ### Module Dependencies
 ##### Requires
+* java.base
 * rs.igram.kiribi.io
 * rs.igram.kiribi.crypto
 
 ##### Exports
 * rs.igram.kiribi.net
 
-### Requirements
-To do
-
-### Known Issues
-To do
+### To Do
+* Determine minimum supported Java version.
+* SCTP EndpointProvider implementation.
