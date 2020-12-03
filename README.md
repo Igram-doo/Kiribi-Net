@@ -30,7 +30,7 @@ Factories for creating endpoints. Currently the following two EndpointProviders 
 * UDPEndpointProvider: creates UDP Endpoints
 
 ##### Network Executor
-Wrapper for a Java ForkJoinPool to facilitate multi-threading.
+Wrapper for a Java ForkJoinPool and ScheduledExecutorService to facilitate multi-threading.
 
 ##### Network Monitor
 Provides static methods to monitor network availability.
@@ -90,4 +90,9 @@ Provides static methods to monitor network availability.
 
 ### To Do
 * Determine minimum supported Java version.
+* Finish unit tests.
+* Add blurb about NAT transversal and router types.
+* Add link to check if router supports NAT transversal.
+* Add blurb about router configuration.
+* Add multicast discovery for use on a LAN.
 * SCTP EndpointProvider implementation.
