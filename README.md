@@ -91,6 +91,7 @@ Provides static methods to monitor network availability.
 ### To Do
 * Determine minimum supported Java version.
 * Finish unit tests.
+* Add Logging.
 * Add blurb about NAT transversal and router types.
 * Add link to check if router supports NAT transversal.
 * Add blurb about router configuration.
