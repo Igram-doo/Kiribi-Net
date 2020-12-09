@@ -44,6 +44,8 @@ import rs.igram.kiribi.net.stack.NetworkProtocol;
 
 import static rs.igram.kiribi.net.stack.kap.KAPProtocol.*;
 
+import static java.util.logging.Level.*;
+
 /**
  * 
  *
@@ -101,7 +103,7 @@ public class KAPProcessor extends Processor {
 			try{
 				mux.write(p);
 			}catch(Throwable x) {
-				x.printStackTrace();
+				LOGGER.log(SEVERE, x.toString(), x);
 			}	
 		}
 	}
@@ -120,10 +122,10 @@ public class KAPProcessor extends Processor {
 				socket.send(KA_PACKET);
 				Thread.sleep(KA_INTERVAL);
 			}catch(SocketException e){
-				System.out.println("Socket closed");
+				LOGGER.log(FINER, "Socket closed");
 				break;
 			}catch(IOException e){
-				System.out.println("Unexpected IOException");
+				LOGGER.log(FINER, "Unexpected IOException");
 				break;
 			}catch(InterruptedException e){
 				break;
@@ -167,7 +169,7 @@ public class KAPProcessor extends Processor {
 		try{
 			mux.write(new DatagramPacket(DATA, 1, a));
 		}catch(IOException e){
-			e.printStackTrace();
+			LOGGER.log(SEVERE, e.toString(), e);
 		}
 	}
 

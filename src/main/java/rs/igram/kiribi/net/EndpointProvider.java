@@ -54,6 +54,8 @@ import rs.igram.kiribi.io.VarOutputStream;
 
 import static rs.igram.kiribi.io.ByteUtils.extract;
 
+import static java.util.logging.Level.*;
+
 /**
  * Factory for endpoints.
  *
@@ -153,7 +155,7 @@ public abstract class EndpointProvider<A> {
 				}
 				boolean b = Magic.verifyMagic(buf, 2);
 				if(!b){
-					System.out.println("Bad Voodoo");
+					LOGGER.log(FINE, "Bad Voodoo");
 					throw new IOException("Bad Voodoo");
 				}
 				protocolVersion = buf[1];
@@ -254,7 +256,6 @@ public abstract class EndpointProvider<A> {
 				root.close();
 			}catch(Exception e){
 				// ignore
-				//e.printStackTrace();
 			}
 			isClosed = false;
 			root = value;
@@ -345,7 +346,9 @@ public abstract class EndpointProvider<A> {
 			// give some time to notify remote peers
 			try{
 				TimeUnit.MILLISECONDS.sleep(250);
-			}catch(Exception z){}
+			}catch(Exception z){
+				// ignore
+			}
 			
 			try{
 				if(notify) root.writeRaw(new byte[]{SecureEndpoint.CLOSE});

@@ -47,6 +47,7 @@ import java.util.logging.Logger;
 
 import static java.net.StandardProtocolFamily.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.logging.Level.*;
 
 /**
  * Singleton providing information and methods related to the network.
@@ -137,9 +138,9 @@ public abstract class NetworkMonitor {
 				}
 			}
 		}catch(SocketException e){
-			e.printStackTrace();
+			LOGGER.log(SEVERE, e.toString(), e);
 		}catch(Throwable e){
-			e.printStackTrace();
+			LOGGER.log(SEVERE, e.toString(), e);
 		}
 		
 		return inet;

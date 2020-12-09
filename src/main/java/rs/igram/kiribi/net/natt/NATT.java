@@ -47,6 +47,8 @@ import rs.igram.kiribi.net.NetworkExecutor;
 
 import static rs.igram.kiribi.io.ByteUtils.*;
 
+import static java.util.logging.Level.*;
+
 /**
  * Support class providing methods for a NATT server.
  *
@@ -131,7 +133,7 @@ abstract class NATT {
 			
 			reader = executor.submit(this::read);
 		}catch(Throwable e){
-			e.printStackTrace();
+			LOGGER.log(SEVERE, e.toString(), e);
 		}
 	}
 
@@ -145,10 +147,10 @@ abstract class NATT {
 				socket.receive(p);
 				process(p);
 			}catch(SocketException e){
-				System.out.println("Socket closed");
+				LOGGER.log(FINER, "Socket closed");
 				break;
 			}catch(IOException e){
-				e.printStackTrace();
+				LOGGER.log(SEVERE, e.toString(), e);
 			}
 		}
 	}
@@ -157,7 +159,7 @@ abstract class NATT {
 		try{
 			socket.send(p);
 		}catch(IOException e){
-			e.printStackTrace();
+			LOGGER.log(SEVERE, e.toString(), e);
 		}
 	}
 
@@ -165,7 +167,7 @@ abstract class NATT {
 		try{
 			socket.send(new DatagramPacket(buf, buf.length, address));
 		}catch(IOException e){
-			e.printStackTrace();
+			LOGGER.log(SEVERE, e.toString(), e);
 		}
 	}
 

@@ -32,7 +32,6 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.net.*;
 import java.util.*;
-import java.util.logging.Logger;
 
 import rs.igram.kiribi.net.Address;
 
@@ -42,7 +41,6 @@ import rs.igram.kiribi.net.Address;
  * @author Michael Sargent
  */
 public final class NATTServer extends NATT {
-	private static final Logger LOGGER = Logger.getLogger(NATTServer.class.getName());
 	final Map<Address, SocketAddress> map = Collections.synchronizedMap(new HashMap<>());
 		
 	/**

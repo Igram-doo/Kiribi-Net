@@ -50,6 +50,8 @@ import rs.igram.kiribi.net.NetworkMonitor;
 import static rs.igram.kiribi.net.stack.NetworkProtocol.*;
 import static rs.igram.kiribi.io.ByteUtils.*;
 
+import static java.util.logging.Level.*;
+
 /**
  * 
  *
@@ -88,8 +90,8 @@ public class NetworkMux {
 			
 			reader = submit(this::read);
 		}catch(SocketException e){
-			e.printStackTrace();
 			// shouldn't happen
+			LOGGER.log(SEVERE, e.toString(), e);
 			throw new RuntimeException(e);
 		}
 		

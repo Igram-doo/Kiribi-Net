@@ -53,6 +53,8 @@ import static rs.igram.kiribi.net.stack.natt.NATTProtocol.SessionType.*;
 import static rs.igram.kiribi.net.stack.natt.NATTProtocol.*;
 import static rs.igram.kiribi.io.ByteUtils.*;
 
+import static java.util.logging.Level.*;
+
 /**
  * 
  *
@@ -86,7 +88,8 @@ public final class NATTProcessor extends Processor {
 		this.server = server;
 		this.listener = listener;
 		this.port = port;
-		System.out.println("NATTClient started on port: "+port+"...");
+		
+		LOGGER.log(FINE, "NATTClient started on port: {0}...", port);
 	}
 	
 	void notify(SessionEvent e) {
@@ -114,18 +117,18 @@ public final class NATTProcessor extends Processor {
 	@Override
 	public void process(DatagramPacket p) {
 		try{
-		System.out.println("NATTClient.process: "+p.getSocketAddress());
-		SocketAddress address = p.getSocketAddress();
-		byte[] buf = p.getData();
-		int l = p.getLength();
-		if(address.equals(server)){
-			processServerResponse(buf);
-		// natt response - process	
-		}else if(l == 9){
-			processNATTResponse(p);
-		}
+			System.out.println("NATTClient.process: "+p.getSocketAddress());
+			SocketAddress address = p.getSocketAddress();
+			byte[] buf = p.getData();
+			int l = p.getLength();
+			if(address.equals(server)){
+				processServerResponse(buf);
+				// natt response - process	
+			}else if(l == 9){
+				processNATTResponse(p);
+			}
 		}catch(IOException e){
-			e.printStackTrace();
+			LOGGER.log(SEVERE, e.toString(), e);
 		}
 	}
 	
@@ -150,7 +153,7 @@ public final class NATTProcessor extends Processor {
 		case ERR: 
 			err(buf);
 			break;
-		default: System.out.println("Unknown: "+c);
+		default: LOGGER.log(FINER, "UNKOWN: {0}...", c);
 		}
 	}
 	
@@ -162,9 +165,9 @@ public final class NATTProcessor extends Processor {
 				try{
 					long start = System.currentTimeMillis();
 					boolean natted = natt(buf).get(2000, TimeUnit.MILLISECONDS);
-					System.out.println("TUNNEL: "+natted+" "+(System.currentTimeMillis() - start) +" "+dst );
+					LOGGER.log(FINER, "TUNNEL: {0} {1} {2}", new Object[]{natted, (System.currentTimeMillis() - start), dst});
 				}catch(Throwable e){
-					e.printStackTrace();
+					LOGGER.log(SEVERE, e.toString(), e);
 				}
 			});
 		}catch(UnknownHostException e){
@@ -176,7 +179,7 @@ public final class NATTProcessor extends Processor {
 	private void adr(byte[] buf) throws IOException {
 		try{
 			external = inet(buf);
-			System.out.println("External IP Address: "+external);
+			LOGGER.log(FINER, "External IP Address: {0}", external);
 		}catch(UnknownHostException e){
 			throw new IOException(e);
 		}
@@ -221,13 +224,13 @@ public final class NATTProcessor extends Processor {
 					try{
 						mux.write(buf, server);
 					}catch(IOException e){
-						e.printStackTrace();
+						LOGGER.log(SEVERE, e.toString(), e);
 					}
 				});
 				
 				SocketAddress dst = future.get(500, TimeUnit.MILLISECONDS);
 				boolean natted = natt(dst, id).get(5000, TimeUnit.MILLISECONDS);
-				System.out.println("NATT connect: "+natted + " "+(System.currentTimeMillis() - start));
+				LOGGER.log(FINER, "NATT connect: {0} {1} {2}", new Object[]{natted, (System.currentTimeMillis() - start)});
 				return natted ? new Key(dst, id) : null;
 			}catch(Throwable e){
 				throw new IOException(e);
@@ -239,7 +242,7 @@ public final class NATTProcessor extends Processor {
 	
 	// --- data stuff ---
 	private void processData(DatagramPacket p){
-		System.out.println("NATTClient.processData: "+p.getSocketAddress());
+		LOGGER.log(FINER, "NATTClient.processData: {0}", p.getSocketAddress());
 		if(consumer != null) consumer.accept(p);
 		notify(new SessionEvent(new Key(p), SOCKET, AVAILABLE, p));
 	}
@@ -251,7 +254,7 @@ public final class NATTProcessor extends Processor {
 			SocketAddress dst = inet(buf);
 			long id = id(buf);
 			Key key = new Key(dst, id);
-			System.out.println("natt server: "+id+" "+dst);
+			LOGGER.log(FINER, "natt server: {0} {1}", new Object[]{id,dst});
 			Session session = sessions.get(key);
 			if(session == null){
 				session = new Session(dst, id);
@@ -268,7 +271,7 @@ public final class NATTProcessor extends Processor {
 	
 	// client side
 	private Future<Boolean> natt(SocketAddress dst, long id) {
-		System.out.println("natt client: "+id+" "+dst);
+		LOGGER.log(FINER, "natt client: {0} {1}", new Object[]{id,dst});
 		Key key = new Key(dst, id);
 		Session session = sessions.get(key);
 		if(session == null){

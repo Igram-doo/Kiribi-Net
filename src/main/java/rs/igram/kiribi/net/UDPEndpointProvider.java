@@ -67,6 +67,8 @@ import static rs.igram.kiribi.net.stack.natt.NATTProcessor.SessionEvent;
 import static rs.igram.kiribi.net.stack.natt.NATTProtocol.SessionType.SOCKET;
 import static rs.igram.kiribi.net.stack.NetworkProtocol.*;
 
+import static java.util.logging.Level.*;
+
 /**
  * UDP Endpoint Provider
  *
@@ -131,7 +133,7 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 			stack.register();
 		}catch(Throwable t){
 			// todo
-			t.printStackTrace();
+			LOGGER.log(SEVERE, t.toString(), t);
 		}
 	}
 

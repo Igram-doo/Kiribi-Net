@@ -47,6 +47,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /** 
@@ -83,7 +84,7 @@ public class NetworkExecutor {
 				if(!executor.awaitTermination(1, TimeUnit.SECONDS)) {
 					executor.shutdownNow();
 					if(!executor.awaitTermination(2, TimeUnit.SECONDS))
-						System.err.println("Kiribi pool failed to terminate");
+						LOGGER.log(Level.FINE, "Kiribi pool failed to terminate");
 				}
 			}catch(InterruptedException e){
 				executor.shutdownNow();

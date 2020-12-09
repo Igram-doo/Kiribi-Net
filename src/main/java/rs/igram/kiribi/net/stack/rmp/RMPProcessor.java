@@ -52,6 +52,8 @@ import rs.igram.kiribi.net.stack.NetworkProtocol;
 import static rs.igram.kiribi.net.stack.rmp.RMPProcessor.State.*;
 import static rs.igram.kiribi.io.ByteUtils.*;
 
+import static java.util.logging.Level.*;
+
 /**
  * 
  *
@@ -139,7 +141,7 @@ public final class RMPProcessor extends Processor {
 			}
 		});
 		timerMark = System.currentTimeMillis();
-		//System.out.println("RMP started...");
+		LOGGER.log(FINE, "RMP started...");
 	}
 	
 	public void process(DatagramPacket p){		

@@ -39,6 +39,8 @@ import java.util.logging.Logger;
 import rs.igram.kiribi.io.VarInputStream;
 import rs.igram.kiribi.io.VarOutputStream;
 
+import static java.util.logging.Level.*;
+
 /**
  * 
  *
