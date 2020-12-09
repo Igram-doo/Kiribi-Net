@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 import rs.igram.kiribi.net.stack.Processor;
 import rs.igram.kiribi.net.stack.NetworkProtocol;
@@ -49,6 +50,8 @@ import static rs.igram.kiribi.net.stack.kap.KAPProtocol.*;
  * @author Michael Sargent
  */
 public class KAPProcessor extends Processor {	
+	private static final Logger LOGGER = Logger.getLogger(KAPProcessor.class.getName());
+	
 	final byte[] DATA = {NetworkProtocol.KAP_PROTOCOL};
 	final Map<SocketAddress,Entry> map = new HashMap<>();
 	final Consumer<SocketAddress> onIncoming;

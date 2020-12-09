@@ -41,6 +41,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 import rs.igram.kiribi.net.stack.Processor;
 import rs.igram.kiribi.net.stack.NetworkProtocol;
@@ -58,6 +59,8 @@ import static rs.igram.kiribi.io.ByteUtils.*;
  * @author Michael Sargent
  */
 public final class NATTProcessor extends Processor {
+	private static final Logger LOGGER = Logger.getLogger(NATTProcessor.class.getName());
+	
 	private static final int SESSION_INIT_LIMIT 		= 30;
 	private static final int SESSION_POST_INIT_LIMIT 	= 3;
 	private static final int SESSION_INIT_DELAY 		= 100;

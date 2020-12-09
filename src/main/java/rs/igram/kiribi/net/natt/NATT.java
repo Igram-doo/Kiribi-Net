@@ -40,6 +40,7 @@ import java.net.*;
 import java.util.Enumeration;
 import java.util.*;
 import java.util.concurrent.Future;
+import java.util.logging.Logger;
 
 import rs.igram.kiribi.net.Address;
 import rs.igram.kiribi.net.NetworkExecutor;
@@ -52,6 +53,8 @@ import static rs.igram.kiribi.io.ByteUtils.*;
  * @author Michael Sargent
  */
 abstract class NATT {
+	private static final Logger LOGGER = Logger.getLogger(NATT.class.getName());
+	
 	static final byte NATT_PROTOCOL = 1; // natt protocol
 	static final byte KAP_PROTOCOL	= 2; // keep alive protocol
 	static final byte RMP_PROTOCOL	= 3; // rmp protocol

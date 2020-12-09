@@ -47,6 +47,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
+import java.util.logging.Logger;
 
 /** 
  * Provides execution methods.
@@ -55,6 +56,7 @@ import java.util.concurrent.locks.Lock;
  * @author Michael Sargent
  */
 public class NetworkExecutor {
+	private static final Logger LOGGER = Logger.getLogger(NetworkExecutor.class.getName());
 	
 	private final ForkJoinPool executor = new ForkJoinPool(
 		10000,

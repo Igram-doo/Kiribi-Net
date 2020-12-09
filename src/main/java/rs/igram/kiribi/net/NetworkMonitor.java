@@ -40,11 +40,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
-
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 
 import static java.net.StandardProtocolFamily.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -55,6 +54,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * @author Michael Sargent
  */
 public abstract class NetworkMonitor {
+	private static final Logger LOGGER = Logger.getLogger(NetworkMonitor.class.getName());
+	
 	private static ScheduledFuture<?> monitor;
 	private static InetAddress inet;
 	private static final CopyOnWriteArrayList<Consumer<InetAddress>> consumers = new CopyOnWriteArrayList();

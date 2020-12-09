@@ -34,6 +34,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.CompletionHandler;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 import rs.igram.kiribi.io.VarInputStream;
 import rs.igram.kiribi.io.VarOutputStream;
@@ -44,6 +45,8 @@ import rs.igram.kiribi.io.VarOutputStream;
  * @author Michael Sargent
  */
 final class TCPEndpointProvider extends EndpointProvider<SocketAddress> {
+	private static final Logger LOGGER = Logger.getLogger(TCPEndpointProvider.class.getName());
+	
 	public TCPEndpointProvider(NetworkExecutor executor) {
 		super(executor);
 	}

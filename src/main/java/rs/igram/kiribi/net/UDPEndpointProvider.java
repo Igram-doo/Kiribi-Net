@@ -49,6 +49,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import rs.igram.kiribi.crypto.KeyExchange;
@@ -72,6 +73,8 @@ import static rs.igram.kiribi.net.stack.NetworkProtocol.*;
  * @author Michael Sargent
  */
 final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
+	private static final Logger LOGGER = Logger.getLogger(UDPEndpointProvider.class.getName());
+	
 	// todo: adjust timeout based on message size?
 	// send timeout ms (30 seconds)
 	static final long DEFAULT_SEND_TIMEOUT = 30_000;

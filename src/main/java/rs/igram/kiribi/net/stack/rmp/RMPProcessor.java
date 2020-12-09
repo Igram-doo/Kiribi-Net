@@ -42,6 +42,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import rs.igram.kiribi.net.stack.NetworkMux;
@@ -58,6 +59,8 @@ import static rs.igram.kiribi.io.ByteUtils.*;
  */
 // reliable message protocol
 public final class RMPProcessor extends Processor {
+	private static final Logger LOGGER = Logger.getLogger(RMPProcessor.class.getName());
+	
 	// received by receiver sessions
 	static final byte SYN = 1;
 	static final byte DAT = 2;

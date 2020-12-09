@@ -33,6 +33,7 @@ import java.net.StandardProtocolFamily;
 import java.net.UnknownHostException;
 import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
+import java.util.logging.Logger;
 
 import rs.igram.kiribi.net.Address;
 import rs.igram.kiribi.net.NetworkExecutor;
@@ -46,6 +47,8 @@ import rs.igram.kiribi.net.stack.rmp.RMPProcessor;
  * @author Michael Sargent
  */
 public abstract class DatagramStack {
+	private static final Logger LOGGER = Logger.getLogger(DatagramStack.class.getName());
+	
 	public static enum Mode {IPV4, IPV6, DUAL};
 	
 	protected final StandardProtocolFamily protocol;

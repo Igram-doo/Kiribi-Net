@@ -82,6 +82,7 @@ Provides static methods to monitor network availability.
 ### Module Dependencies
 ##### Requires
 * java.base
+* java.logging
 * rs.igram.kiribi.io
 * rs.igram.kiribi.crypto
 

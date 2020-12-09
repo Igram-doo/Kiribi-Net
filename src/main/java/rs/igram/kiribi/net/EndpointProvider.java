@@ -41,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 import rs.igram.kiribi.crypto.KeyExchange;
 import rs.igram.kiribi.io.ByteStream;
@@ -59,6 +60,8 @@ import static rs.igram.kiribi.io.ByteUtils.extract;
  * @author Michael Sargent
  */
 public abstract class EndpointProvider<A> {
+	private static final Logger LOGGER = Logger.getLogger(EndpointProvider.class.getName());
+	
 	final Map<Address,SocketAddress> cache = new HashMap<>();
 	final NetworkExecutor executor;
 	

@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 import rs.igram.kiribi.net.NetworkExecutor;
 import rs.igram.kiribi.net.Address;
@@ -55,6 +56,8 @@ import static rs.igram.kiribi.io.ByteUtils.*;
  * @author Michael Sargent
  */
 public class NetworkMux {	
+	private static final Logger LOGGER = Logger.getLogger(NetworkMux.class.getName());
+	
 	protected final Map<Byte,Processor> processors = new HashMap<>();
 	// offsets
 	protected static int OFF_ID	= 1;

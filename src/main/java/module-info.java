@@ -31,6 +31,7 @@
  */
 module rs.igram.kiribi.net {
 	requires java.base;
+	requires java.logging;
 	requires rs.igram.kiribi.io;
 	requires rs.igram.kiribi.crypto;
 	exports rs.igram.kiribi.net;

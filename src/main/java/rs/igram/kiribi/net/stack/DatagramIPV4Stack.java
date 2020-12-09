@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.BiConsumer;
+import java.util.logging.Logger;
 
 import rs.igram.kiribi.net.Address;
 import rs.igram.kiribi.net.NetworkExecutor;
@@ -51,6 +52,8 @@ import static rs.igram.kiribi.io.ByteUtils.*;
  * @author Michael Sargent
  */
 public final class DatagramIPV4Stack extends DatagramStack {
+	private static final Logger LOGGER = Logger.getLogger(DatagramIPV4Stack.class.getName());
+	
 	Consumer<SocketAddress> onIncoming;
 	Consumer<Set<SocketAddress>> onExpired;
 	Consumer<NATTProcessor.SessionEvent> listener;
