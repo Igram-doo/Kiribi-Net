@@ -117,7 +117,7 @@ public final class NATTProcessor extends Processor {
 	@Override
 	public void process(DatagramPacket p) {
 		try{
-			System.out.println("NATTClient.process: "+p.getSocketAddress());
+			LOGGER.log(FINER, "NATTClient.process: {0}", p.getSocketAddress());
 			SocketAddress address = p.getSocketAddress();
 			byte[] buf = p.getData();
 			int l = p.getLength();
