@@ -55,7 +55,7 @@ import static java.util.logging.Level.*;
  *
  * @author Michael Sargent
  */
-public abstract class NetworkMonitor {
+public class NetworkMonitor {
 	private static final Logger LOGGER = Logger.getLogger(NetworkMonitor.class.getName());
 	
 	private static ScheduledFuture<?> monitor;
