@@ -119,10 +119,10 @@ public class EndpointProviderTest {
    	   }
    	   
    	   void run(int port) throws IOException, InterruptedException, Exception {
-   	   	   NetworkMonitor.monitor(executor);
-   	   	   NetworkMonitor.onAvailable(() -> {
+   	   	//   NetworkMonitor.monitor(executor);
+   	   	//   NetworkMonitor.onAvailable(() -> {
    	   		   availableSignal.countDown();
-   	   	   });
+   	   	//   });
    	   	   availableSignal.await(3, TimeUnit.SECONDS);
    	   	   
    	   	   ServerEndpoint se = provider.open(port);

@@ -58,11 +58,6 @@ import static java.util.logging.Level.*;
 public class NetworkMonitor {
 	private static final Logger LOGGER = Logger.getLogger(NetworkMonitor.class.getName());
 	
-	private static ScheduledFuture<?> monitor;
-	private static InetAddress inet;
-	private static final CopyOnWriteArrayList<Consumer<InetAddress>> consumers = new CopyOnWriteArrayList();
-	private static NetworkExecutor executor;
-	
 	private final NetworkExecutor nexecutor;
 	private final BiConsumer<Boolean,SocketException> statusListener;
 	private final NetworkInterface networkInterface;
@@ -70,8 +65,6 @@ public class NetworkMonitor {
 	private final long period;
 	private final ScheduledFuture<?> future;
 	boolean isUp = false;
-	
-	//NetworkMonitor() {}
 	
 	public NetworkMonitor(NetworkExecutor executor, BiConsumer<Boolean,SocketException> statusListener) throws SocketException {
 		
@@ -119,9 +112,9 @@ public class NetworkMonitor {
 	}
 	
 	/**
-	 * Returns the inet address address of the system.
+	 * Returns the default inet address of the system.
 	 *
-	 * @return Returns the inet address address of the system.
+	 * @return Returns the inet address of the system.
 	 */
 	public static InetAddress inet() {
 		try {
@@ -148,107 +141,5 @@ public class NetworkMonitor {
 			}
 		}
 		return null;	
-	}
-	
-	/**
-	 * This method starts the network monitor.
-	 *
-	 * @param executor The executor this monitor will use.
-	 */
-	@Deprecated
-	public static void monitor(NetworkExecutor executor) {
-		synchronized(NetworkMonitor.class){
-			if(monitor != null) return;
-			NetworkMonitor.executor = executor;
-			
-			monitor = executor.scheduleAtFixedRate(NetworkMonitor::update, 0, 5, SECONDS);
-		}
-	}
-
-	/**
-	 * Returns the inet address address of the system.
-	 *
-	 * @return Returns the inet address address of the system.
-	 */
-//	public static InetAddress inet() {return inet;}
-	
-	static void addConsumer(Consumer<InetAddress> consumer) {consumers.addIfAbsent(consumer);}
-	
-	static void removeConsumer(Consumer<InetAddress> consumer) {consumers.remove(consumer);}
-	
-	private static void consume(InetAddress item, boolean async) {
-		if(async){
-			executor.submit(() -> consumers.forEach(c -> c.accept(item)));
-		}else{
-			consumers.forEach(c -> c.accept(item));
-		}
-	}
-	
-	private static Consumer<InetAddress> consumeIf(Predicate<InetAddress> predicate, Consumer<InetAddress> consumer) {
-		return t -> {
-			if(predicate.test(t)) consumer.accept(t);
-		};
-	}
-
-	/**
-	 * This method will run the provided runnable when the network becomes available.
-	 *
-	 * @param action The runnable to execute when the network becomes available.
-	 */
-	@Deprecated
-	public static void onAvailable(Runnable action) {
-		synchronized (consumers) {
-			if(inet != null) executor.submit(action);
-			addConsumer(i -> {
-				if(i != null) executor.submit(action);
-			});
-		}
-	}
-
-	private static InetAddress address() {
-		try{
-			return inet(defaultNetworkInterface(), INET, false);
-		} catch (SocketException e) {
-			return null;
-		}
-	}
-/*
-	static InetAddress inet(StandardProtocolFamily protocol, boolean linkLocal) {
-		InetAddress inet = null;
-		try{
-			for(Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces(); e.hasMoreElements();){
-				NetworkInterface i = e.nextElement();
-				if(!i.isLoopback() && i.isUp() && !i.isVirtual() && !i.toString().contains("Teredo")){
-					inet = inet(i, protocol, linkLocal);
-					if(inet != null) return inet;
-				}
-			}
-		}catch(SocketException e){
-			LOGGER.log(SEVERE, e.toString(), e);
-		}catch(Throwable e){
-			LOGGER.log(SEVERE, e.toString(), e);
-		}
-		
-		return inet;
-	}
-*/	
-	/**
-	 * Returns <code>true</code> if the network is available, <code>false</code> otherwise.
-	 *
-	 * @return Returns the inet address address of the system.
-	 */
-	@Deprecated
-	public static boolean isUp() {
-		return inet != null;
-	}
-	
-	private static void update() {
-		final InetAddress old = inet;
-		inet = address();
-		if(inet != old) consume(inet, false);
-	}
-	
-	private static void shutdown() {
-		if(monitor != null) monitor.cancel(true);
 	}
 }
