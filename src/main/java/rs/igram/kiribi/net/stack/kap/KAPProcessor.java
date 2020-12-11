@@ -51,6 +51,11 @@ import static java.util.logging.Level.*;
  *
  * @author Michael Sargent
  */
+/*
+ TODO - 
+ enhance logging
+ unit tests
+ */
 public class KAPProcessor extends Processor {	
 	private static final Logger LOGGER = Logger.getLogger(KAPProcessor.class.getName());
 	

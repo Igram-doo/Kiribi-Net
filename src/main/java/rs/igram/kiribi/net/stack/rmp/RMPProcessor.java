@@ -69,7 +69,12 @@ import static java.util.logging.Level.*;
  continue until all 8 chunks received
  move to next 8 chunks
  continue until all data received
-*/
+ */
+/*
+ TODO - 
+ enhance logging
+ unit tests
+ */
 public final class RMPProcessor extends Processor {
 	private static final Logger LOGGER = Logger.getLogger(RMPProcessor.class.getName());
 	

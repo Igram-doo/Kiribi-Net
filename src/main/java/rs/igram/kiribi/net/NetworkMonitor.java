@@ -73,15 +73,9 @@ public abstract class NetworkMonitor {
 		synchronized(NetworkMonitor.class){
 			if(monitor != null) return;
 			NetworkMonitor.executor = executor;
-			// static ip for registrar
-			if(System.getProperty("kiribi.registrar", "false").equals("true")){
-				update();
-			}else{
-				monitor = executor.scheduleAtFixedRate(NetworkMonitor::update, 0, 5, SECONDS);
-			}
+			
+			monitor = executor.scheduleAtFixedRate(NetworkMonitor::update, 0, 5, SECONDS);
 		}
-		
-		executor.onShutdown(5, NetworkMonitor::shutdown);
 	}
 
 	/**

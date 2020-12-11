@@ -60,6 +60,11 @@ import static java.util.logging.Level.*;
  *
  * @author Michael Sargent
  */
+/*
+ TODO - 
+ enhance logging
+ unit tests
+ */
 public final class NATTProcessor extends Processor {
 	private static final Logger LOGGER = Logger.getLogger(NATTProcessor.class.getName());
 	

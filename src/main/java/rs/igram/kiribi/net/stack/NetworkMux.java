@@ -57,6 +57,11 @@ import static java.util.logging.Level.*;
  *
  * @author Michael Sargent
  */
+/*
+ TODO - 
+ enhance logging
+ unit tests
+ */
 public class NetworkMux {	
 	private static final Logger LOGGER = Logger.getLogger(NetworkMux.class.getName());
 	
