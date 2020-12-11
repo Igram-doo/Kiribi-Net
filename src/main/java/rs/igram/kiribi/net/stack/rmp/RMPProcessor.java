@@ -55,11 +55,21 @@ import static rs.igram.kiribi.io.ByteUtils.*;
 import static java.util.logging.Level.*;
 
 /**
- * 
+ * Reliable Message Protocol Processor
  *
  * @author Michael Sargent
  */
-// reliable message protocol
+/*
+ -- reliable message protocol --
+ 
+ break data into chunks not exceeding MTU - headers
+ send 8 chunks (or possibly less if last the last part of data)
+ wait for response
+ if returned message indicates missing chunks, resend them
+ continue until all 8 chunks received
+ move to next 8 chunks
+ continue until all data received
+*/
 public final class RMPProcessor extends Processor {
 	private static final Logger LOGGER = Logger.getLogger(RMPProcessor.class.getName());
 	
@@ -93,8 +103,6 @@ public final class RMPProcessor extends Processor {
 	// avoid concurrent modifications to session maps during timeout/dispose
 	final Semaphore semaphore = new Semaphore(1);
 	final BiConsumer<SocketAddress,byte[]> consumer;
-//	final DatagramSocket socket;
-//	final byte protocol;
 	
 	long sessionCounter = 0l;
 	// timer mark
@@ -346,7 +354,6 @@ public final class RMPProcessor extends Processor {
 			try{
 				mux.write(p);
 			}catch(Exception e){
-				e.printStackTrace();
 				// ignore
 			}
 		}

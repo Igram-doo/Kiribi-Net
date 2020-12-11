@@ -167,7 +167,6 @@ public abstract class EndpointProvider<A> {
 				protocolVersion = Math.min(buf[1], version.protocolVersion);
 				boolean b = Magic.verifyMagic(buf, 2);
 				if(!b){
-					// System.out.println("Bad Voodoo");
 					throw new IOException("Bad Voodoo");
 				}
 				buf[1] = (byte)protocolVersion;

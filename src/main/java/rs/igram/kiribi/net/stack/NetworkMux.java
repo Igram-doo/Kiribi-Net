@@ -132,10 +132,6 @@ public class NetworkMux {
 	public void write(DatagramPacket p) throws IOException {
 		socket.send(p);
 	}
-
-	public void write(byte[] buf, SocketAddress address) throws IOException {
-		socket.send(new DatagramPacket(buf, buf.length, address));
-	}
 	
 	public static void protocol(byte[] b, byte protocol) {
 		b[0] = protocol;

@@ -205,7 +205,8 @@ public final class NATTProcessor extends Processor {
 		protocol(buf, NetworkProtocol.NATT_PROTOCOL);
 		cmd(buf, REG);
 		address(buf, address);
-		mux.write(buf, server);
+		
+		mux.write(new DatagramPacket(buf, buf.length, server));
 	}
 	
 	public Key connect(Address address) throws IOException {
@@ -222,7 +223,7 @@ public final class NATTProcessor extends Processor {
 				submit(() -> {
 					// todo
 					try{
-						mux.write(buf, server);
+						mux.write(new DatagramPacket(buf, buf.length, server));
 					}catch(IOException e){
 						LOGGER.log(SEVERE, e.toString(), e);
 					}
