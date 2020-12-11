@@ -86,7 +86,7 @@ public class NetworkMonitor {
 		this.networkInterface = networkInterface == null ? defaultNetworkInterface() : networkInterface;
 		this.initialDelay = initialDelay;
 		this.period = period;
-		isUp = networkInterface.isUp();
+		isUp = this.networkInterface.isUp();
 		
 		future = executor.scheduleAtFixedRate(() -> {
 				try {

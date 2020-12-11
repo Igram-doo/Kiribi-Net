@@ -52,20 +52,23 @@ import rs.igram.kiribi.io.*;
  * @author Michael Sargent
  */
 public class NetworkMonitorTest {
-/*
+
    @Test
-   public void testOnAvailable() throws IOException, InterruptedException {
+   public void testOnAvailable() throws IOException, InterruptedException, Exception {
    	   NetworkExecutor executor = new NetworkExecutor();
    	   boolean[] result = new boolean[1];
+   	   Exception[] ex = new Exception[1];
    	   CountDownLatch latch = new CountDownLatch(1);
-   	   NetworkMonitor.monitor(executor);
-   	   NetworkMonitor.onAvailable(() -> {
+   	   new NetworkMonitor(executor, (isUp, e) -> {
+   	   
    	   		   result[0] = true;
+   	   		   ex[0] = e;
    	   		   latch.countDown();
    	   });
    	   latch.await(3, TimeUnit.SECONDS);
    	   
    	   assertTrue(result[0]);
+   	   if (ex[0] != null) throw ex[0];
    }
-   */
+   
 }
