@@ -106,10 +106,13 @@ public class NetworkMonitor {
 	}
 	
 	public static NetworkInterface defaultNetworkInterface() throws SocketException {
-		for(Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces(); e.hasMoreElements();){
-			NetworkInterface i = e.nextElement();
+		for(Enumeration<NetworkInterface> n = NetworkInterface.getNetworkInterfaces(); n.hasMoreElements();){
+			NetworkInterface i = n.nextElement();
 			if(!i.isLoopback() && !i.isVirtual() && !i.toString().contains("Teredo")){
-				return i;
+				for(Enumeration<InetAddress> e = i.getInetAddresses(); e.hasMoreElements();){
+					InetAddress a = e.nextElement();
+					if(a instanceof Inet4Address && !a.isLinkLocalAddress()) return i;
+				}
 			}
 		}
 		return null;	
