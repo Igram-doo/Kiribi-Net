@@ -52,7 +52,7 @@ import rs.igram.kiribi.io.*;
  * @author Michael Sargent
  */
 public class NetworkMonitorTest {
-
+/*
    @Test
    public void testOnAvailable() throws IOException, InterruptedException {
    	   NetworkExecutor executor = new NetworkExecutor();
@@ -67,4 +67,5 @@ public class NetworkMonitorTest {
    	   
    	   assertTrue(result[0]);
    }
+   */
 }

@@ -41,6 +41,7 @@ import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
@@ -62,13 +63,95 @@ public abstract class NetworkMonitor {
 	private static final CopyOnWriteArrayList<Consumer<InetAddress>> consumers = new CopyOnWriteArrayList();
 	private static NetworkExecutor executor;
 	
-	private NetworkMonitor() {}
+	private final NetworkExecutor nexecutor;
+	private final BiConsumer<Boolean,SocketException> statusListener;
+	private final NetworkInterface networkInterface;
+	private final long initialDelay;
+	private final long period;
+	private final ScheduledFuture<?> future;
+	boolean isUp = false;
+	
+	//NetworkMonitor() {}
+	
+	public NetworkMonitor(NetworkExecutor executor, BiConsumer<Boolean,SocketException> statusListener) throws SocketException {
+		
+		this(executor, statusListener, null, 1, 5);
+	}
+	
+	public NetworkMonitor(NetworkExecutor executor, BiConsumer<Boolean,SocketException> statusListener, 
+		NetworkInterface networkInterface, long initialDelay, long period) throws SocketException {
+		
+		this.nexecutor = executor;
+		this.statusListener = statusListener;
+		this.networkInterface = networkInterface == null ? defaultNetworkInterface() : networkInterface;
+		this.initialDelay = initialDelay;
+		this.period = period;
+		isUp = networkInterface.isUp();
+		
+		future = executor.scheduleAtFixedRate(() -> {
+				try {
+					if (isUp != networkInterface.isUp()) {
+						isUp = networkInterface.isUp();	
+						statusListener.accept(isUp, null);
+					}
+				} catch (SocketException e) {
+					statusListener.accept(null, e);
+				}
+			}, initialDelay, period, SECONDS);
+	}
+	
+	public void terminate() {
+		if(future != null) future.cancel(true);
+	}
+	
+	public static NetworkInterface defaultNetworkInterface() throws SocketException {
+		for(Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces(); e.hasMoreElements();){
+			NetworkInterface i = e.nextElement();
+			if(!i.isLoopback() && !i.isVirtual() && !i.toString().contains("Teredo")){
+				return i;
+			}
+		}
+		return null;	
+	}
+	
+	/**
+	 * Returns the inet address address of the system.
+	 *
+	 * @return Returns the inet address address of the system.
+	 */
+	public static InetAddress inet() {
+		try {
+			return inet(defaultNetworkInterface());	
+		} catch (SocketException e) {
+			return null;
+		}
+	}
+	
+	public static InetAddress inet(NetworkInterface iface) {
+		return inet(iface, INET, false);	
+	}
+	
+	public static InetAddress inet(NetworkInterface iface, StandardProtocolFamily protocol, boolean linkLocal) {
+		for(Enumeration<InetAddress> e = iface.getInetAddresses(); e.hasMoreElements();){
+			InetAddress a = e.nextElement();
+			switch(protocol){
+			case INET: 
+				if(a instanceof Inet4Address && linkLocal == a.isLinkLocalAddress()) return a;
+				break;
+			case INET6: 
+				if(a instanceof Inet6Address && linkLocal == a.isLinkLocalAddress()) return a;
+				break;
+			}
+		}
+		return null;	
+	}
 	
 	/**
 	 * This method starts the network monitor.
 	 *
 	 * @param executor The executor this monitor will use.
 	 */
+	@Deprecated
 	public static void monitor(NetworkExecutor executor) {
 		synchronized(NetworkMonitor.class){
 			if(monitor != null) return;
@@ -83,7 +166,7 @@ public abstract class NetworkMonitor {
 	 *
 	 * @return Returns the inet address address of the system.
 	 */
-	public static InetAddress inet() {return inet;}
+//	public static InetAddress inet() {return inet;}
 	
 	static void addConsumer(Consumer<InetAddress> consumer) {consumers.addIfAbsent(consumer);}
 	
@@ -108,6 +191,7 @@ public abstract class NetworkMonitor {
 	 *
 	 * @param action The runnable to execute when the network becomes available.
 	 */
+	@Deprecated
 	public static void onAvailable(Runnable action) {
 		synchronized (consumers) {
 			if(inet != null) executor.submit(action);
@@ -118,9 +202,13 @@ public abstract class NetworkMonitor {
 	}
 
 	private static InetAddress address() {
-		return inet(INET, false);
+		try{
+			return inet(defaultNetworkInterface(), INET, false);
+		} catch (SocketException e) {
+			return null;
+		}
 	}
-
+/*
 	static InetAddress inet(StandardProtocolFamily protocol, boolean linkLocal) {
 		InetAddress inet = null;
 		try{
@@ -139,27 +227,13 @@ public abstract class NetworkMonitor {
 		
 		return inet;
 	}
-
-	static InetAddress inet(NetworkInterface iface, StandardProtocolFamily protocol, boolean linkLocal) {
-		for(Enumeration<InetAddress> e = iface.getInetAddresses(); e.hasMoreElements();){
-			InetAddress a = e.nextElement();
-			switch(protocol){
-			case INET: 
-				if(a instanceof Inet4Address && linkLocal == a.isLinkLocalAddress()) return a;
-				break;
-			case INET6: 
-				if(a instanceof Inet6Address && linkLocal == a.isLinkLocalAddress()) return a;
-				break;
-			}
-		}
-		return null;	
-	}
-
+*/	
 	/**
 	 * Returns <code>true</code> if the network is available, <code>false</code> otherwise.
 	 *
 	 * @return Returns the inet address address of the system.
 	 */
+	@Deprecated
 	public static boolean isUp() {
 		return inet != null;
 	}

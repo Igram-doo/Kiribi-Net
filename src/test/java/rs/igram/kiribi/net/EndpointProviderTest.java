@@ -58,6 +58,7 @@ import rs.igram.kiribi.net.natt.NATTServer;
  * @author Michael Sargent
  */
 public class EndpointProviderTest {
+	/*
 	@Test
 	public void testTCP() throws IOException, InterruptedException, Exception {
 		int port = 6732;
@@ -153,7 +154,7 @@ public class EndpointProviderTest {
    	   	   });
    	   }
    }
-   
+   */
    static class Message implements Encodable {
    	   private String txt;
    	   

@@ -163,7 +163,7 @@ public final class RMPProcessor extends Processor {
 	
 	@Override
 	public void shutdown() {
-		processor.cancel(true);
+		if (processor != null) processor.cancel(true);
 	}
 	
 	public Future<Boolean> send(SocketAddress address, byte[] data) throws InterruptedException {
