@@ -98,6 +98,7 @@ public class NetworkMonitor {
 					statusListener.accept(null, e);
 				}
 			}, initialDelay, period, SECONDS);
+		statusListener.accept(isUp, null);
 	}
 	
 	public void terminate() {
