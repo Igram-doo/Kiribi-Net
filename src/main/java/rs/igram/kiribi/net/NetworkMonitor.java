@@ -41,11 +41,20 @@ import java.util.function.Consumer;
 import static java.net.StandardProtocolFamily.*;
 
 /**
- * Singleton providing information and methods related to the network.
+ * Network monitoring class providing information and methods related to the network.
  *
  * @author Michael Sargent
  */
 public class NetworkMonitor {
+	/** Default <code>protocol</code>: INET. */
+	public static final StandardProtocolFamily DEFAULT_PROTOCOL = INET;
+	/** Default <code>initialDelay</code>: 100l. */
+	public static final long DEFAULT_INITIAL_DELAY = 100l;
+	/** Default <code>period</code>: 5000l. */
+	public static final long DEFAULT_PERIOD = 5000l;
+	/** Default <code>unit</code>: MILLISECONDS. */
+	public static final TimeUnit DEFAULT_TIME_UNIT = TimeUnit.MILLISECONDS;
+	
 	/** The <code>NetworkInterface</code> to monitor. */
 	public final NetworkInterface networkInterface;
 	/** The <code>StandardProtocolFamily</code> to monitor. */
@@ -62,23 +71,58 @@ public class NetworkMonitor {
 	private final Consumer<Status> consumer;
 	private final ScheduledFuture<?> future;
 	private final boolean linkLocal;
-	
+
+	/**
+	 * Instantiates a new <code>NetworkMonitor</code> initialized with the given parameters.
+	 *
+	 * @param executor The <code>NetworkExecutor</code> to use.
+	 * @param consumer The <code>Consumer</code> which will be notified of status changes.
+	 * @throws SocketException if there was a problem determining the default <code>NetworkInterface</code>.
+	 */		
 	public NetworkMonitor(NetworkExecutor executor, Consumer<Status> consumer) throws SocketException {
-		this(executor, consumer, defaultNetworkInterface(), 100, 5000);
+		this(executor, consumer, defaultNetworkInterface(), DEFAULT_INITIAL_DELAY, DEFAULT_PERIOD);
 	}
-	
+
+	/**
+	 * Instantiates a new <code>NetworkMonitor</code> initialized with the given parameters.
+	 *
+	 * @param executor The <code>NetworkExecutor</code> to use.
+	 * @param consumer The <code>Consumer</code> which will be notified of status changes.
+	 * @param networkInterface The <code>NetworkInterface</code> to use.
+	 */		
 	public NetworkMonitor(NetworkExecutor executor, Consumer<Status> consumer, 
 		NetworkInterface networkInterface) {
 		
-		this(executor, consumer, networkInterface, INET, 100, 5000, TimeUnit.MILLISECONDS, false);
+		this(executor, consumer, networkInterface, DEFAULT_PROTOCOL, DEFAULT_INITIAL_DELAY, DEFAULT_PERIOD, DEFAULT_TIME_UNIT, false);
 	}
-	
+
+	/**
+	 * Instantiates a new <code>NetworkMonitor</code> initialized with the given parameters.
+	 *
+	 * @param executor The <code>NetworkExecutor</code> to use.
+	 * @param consumer The <code>Consumer</code> which will be notified of status changes.
+	 * @param networkInterface The <code>NetworkInterface</code> to use.
+	 * @param initialDelay The initial delay to wait before monitoring.
+	 * @param period The period between monitoring updates.
+	 */	
 	public NetworkMonitor(NetworkExecutor executor, Consumer<Status> consumer, 
 		NetworkInterface networkInterface, long initialDelay, long period) {
 		
-		this(executor, consumer, networkInterface, INET, initialDelay, period, TimeUnit.MILLISECONDS, false);
+		this(executor, consumer, networkInterface, INET, initialDelay, period, DEFAULT_TIME_UNIT, false);
 	}
 	
+	/**
+	 * Instantiates a new <code>NetworkMonitor</code> initialized with the given parameters.
+	 *
+	 * @param executor The <code>NetworkExecutor</code> to use.
+	 * @param consumer The <code>Consumer</code> which will be notified of status changes.
+	 * @param networkInterface The <code>NetworkInterface</code> to use.
+	 * @param protocol The <code>StandardProtocolFamily</code> to use.
+	 * @param initialDelay The initial delay to wait before monitoring.
+	 * @param period The period between monitoring updates.
+	 * @param unit The <code>TimeUnit</code> of the initialValue and period paramenters.
+	 * @param linkLocal The linkLocal flag to use.
+	 */		
 	public NetworkMonitor(NetworkExecutor executor, Consumer<Status> consumer, 
 		NetworkInterface networkInterface, StandardProtocolFamily protocol, long initialDelay, 
 		long period, TimeUnit unit, boolean linkLocal) {
@@ -118,7 +162,10 @@ public class NetworkMonitor {
 	 * Terminates this network monitor.
 	 */
 	public void terminate() {
-		if(future != null) future.cancel(true);
+		if(future != null) {
+			future.cancel(true);
+			status.set(Status.TERMINATED);
+		}
 	}
 	
 	private Status update() {
@@ -132,6 +179,12 @@ public class NetworkMonitor {
 		return tmp;
 	}
 	
+	/**
+	 * Returns the default <code>NetworkInterface</code> of the system.
+	 *
+	 * @return Returns the default <code>NetworkInterface</code> of the system.
+	 * @throws SocketException if there was a problem determining the default <code>NetworkInterface</code>.
+	 */	
 	public static NetworkInterface defaultNetworkInterface() throws SocketException {
 		for(Enumeration<NetworkInterface> n = NetworkInterface.getNetworkInterfaces(); n.hasMoreElements();){
 			NetworkInterface i = n.nextElement();
@@ -157,11 +210,25 @@ public class NetworkMonitor {
 			return null;
 		}
 	}
-	
+		
+	/**
+	 * Returns the ipv4 inet address associated with the provided <code>NetworkInterface</code>.
+	 *
+	 * @param iface The <code>NetworkInterface</code> to use.
+	 * @return Returns the inet address of the system.
+	 */
 	public static InetAddress inet(NetworkInterface iface) {
 		return inet(iface, INET, false);	
 	}
 	
+	/**
+	 * Returns the default inet address of the system.
+	 *
+	 * @param iface The <code>NetworkInterface</code> to use.
+	 * @param protocol The <code>StandardProtocolFamily</code> to use.
+	 * @param linkLocal The linkLocal flag to use.
+	 * @return Returns the inet address of the system.
+	 */	
 	public static InetAddress inet(NetworkInterface iface, StandardProtocolFamily protocol, boolean linkLocal) {
 		for(Enumeration<InetAddress> e = iface.getInetAddresses(); e.hasMoreElements();){
 			InetAddress a = e.nextElement();
@@ -177,5 +244,17 @@ public class NetworkMonitor {
 		return null;	
 	}
 	
-	public static enum Status {PENDING, UP, DOWN, ERROR}
+	/** Indicates the status of a network monitor. */
+	public static enum Status {
+		/** Indicates the monitor has not yet determine the state of the network being monitored. */
+		PENDING, 
+		/** Indicates the network being monitored is up. */
+		UP, 
+		/** Indicates the network being monitored is down. */
+		DOWN, 
+		/** Indicates the monitor has encountered an error determining the state of the network being monitored. */
+		ERROR, 
+		/** Indicates the monitor has not been terminated. */
+		TERMINATED
+	}
 }
