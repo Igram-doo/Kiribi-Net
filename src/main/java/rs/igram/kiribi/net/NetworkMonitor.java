@@ -24,31 +24,21 @@
  
 package rs.igram.kiribi.net;
 
-import java.io.IOException;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
-import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
-import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.StandardProtocolFamily;
 import java.net.UnknownHostException;
-import java.util.Enumeration;                    
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Enumeration;   
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.logging.Logger;
 
 import static java.net.StandardProtocolFamily.*;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static java.util.logging.Level.*;
 
 /**
  * Singleton providing information and methods related to the network.
@@ -56,31 +46,51 @@ import static java.util.logging.Level.*;
  * @author Michael Sargent
  */
 public class NetworkMonitor {
-	private static final Logger LOGGER = Logger.getLogger(NetworkMonitor.class.getName());
+	
+	public final NetworkInterface networkInterface;
+	public final StandardProtocolFamily protocol;
+	public final long initialDelay;
+	public final long period;
+	public final TimeUnit unit;
+	public final AtomicReference<Status> status = new AtomicReference<>(Status.PENDING);
 	
 	private final NetworkExecutor nexecutor;
 	private final BiConsumer<Boolean,SocketException> statusListener;
-	private final NetworkInterface networkInterface;
-	private final long initialDelay;
-	private final long period;
+	private final Consumer<Status> consumer;
 	private final ScheduledFuture<?> future;
+	private final boolean linkLocal;
+	
+	
 	boolean isUp = false;
 	
+	@Deprecated
 	public NetworkMonitor(NetworkExecutor executor, BiConsumer<Boolean,SocketException> statusListener) throws SocketException {
 		
 		this(executor, statusListener, null, 1, 5);
 	}
 	
+	@Deprecated
 	public NetworkMonitor(NetworkExecutor executor, BiConsumer<Boolean,SocketException> statusListener, 
 		NetworkInterface networkInterface, long initialDelay, long period) throws SocketException {
+		
+		this(executor, statusListener, networkInterface, INET, initialDelay, period, TimeUnit.SECONDS, false);
+	}
+	
+	@Deprecated
+	public NetworkMonitor(NetworkExecutor executor, BiConsumer<Boolean,SocketException> statusListener, 
+		NetworkInterface networkInterface, StandardProtocolFamily protocol, long initialDelay, 
+		long period, TimeUnit unit, boolean linkLocal) throws SocketException {
 		
 		this.nexecutor = executor;
 		this.statusListener = statusListener;
 		this.networkInterface = networkInterface == null ? defaultNetworkInterface() : networkInterface;
+		this.protocol = protocol == null ? INET : protocol;
 		this.initialDelay = initialDelay;
 		this.period = period;
+		this.unit = unit;
+		this.linkLocal = linkLocal;
 		isUp = this.networkInterface.isUp();
-		
+		consumer = null;
 		future = executor.scheduleAtFixedRate(() -> {
 				try {
 					if (isUp != networkInterface.isUp()) {
@@ -90,12 +100,67 @@ public class NetworkMonitor {
 				} catch (SocketException e) {
 					statusListener.accept(null, e);
 				}
-			}, initialDelay, period, SECONDS);
+			}, initialDelay, period, unit);
 		statusListener.accept(isUp, null);
+	}
+	
+	
+	public NetworkMonitor(NetworkExecutor executor, Consumer<Status> consumer) throws SocketException {
+		
+		this(executor, consumer, defaultNetworkInterface(), 100, 5000);
+	}
+	
+	public NetworkMonitor(NetworkExecutor executor, Consumer<Status> consumer, 
+		NetworkInterface networkInterface, long initialDelay, long period) {
+		
+		this(executor, consumer, networkInterface, INET, initialDelay, period, TimeUnit.MILLISECONDS, false);
+	}
+	
+	public NetworkMonitor(NetworkExecutor executor, Consumer<Status> consumer, 
+		NetworkInterface networkInterface, StandardProtocolFamily protocol, long initialDelay, 
+		long period, TimeUnit unit, boolean linkLocal) {
+		
+		this.nexecutor = executor;
+		this.consumer = consumer;
+		this.statusListener = null;
+		this.networkInterface = networkInterface;
+		this.protocol = protocol == null ? INET : protocol;
+		this.initialDelay = initialDelay;
+		this.period = period;
+		this.unit = unit;
+		this.linkLocal = linkLocal;
+		
+		future = executor.scheduleAtFixedRate(() -> consumer.accept(update()), initialDelay, period, unit);
+	}
+					
+	public InetAddress inetAddress() {
+		for(Enumeration<InetAddress> e = networkInterface.getInetAddresses(); e.hasMoreElements();){
+			InetAddress a = e.nextElement();
+			switch(protocol){
+			case INET: 
+				if(a instanceof Inet4Address && linkLocal == a.isLinkLocalAddress()) return a;
+				break;
+			case INET6: 
+				if(a instanceof Inet6Address && linkLocal == a.isLinkLocalAddress()) return a;
+				break;
+			}
+		}
+		return null;	
 	}
 	
 	public void terminate() {
 		if(future != null) future.cancel(true);
+	}
+	
+	private Status update() {
+		Status tmp = null;
+		try {
+			tmp = networkInterface.isUp() ? Status.UP : Status.DOWN;
+		} catch (SocketException e) {
+			tmp = Status.ERROR;
+		}
+		status.set(tmp);
+		return tmp;
 	}
 	
 	public static NetworkInterface defaultNetworkInterface() throws SocketException {
@@ -142,4 +207,6 @@ public class NetworkMonitor {
 		}
 		return null;	
 	}
+	
+	public static enum Status {PENDING, UP, DOWN, ERROR}
 }

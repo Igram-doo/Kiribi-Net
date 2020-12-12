@@ -56,19 +56,16 @@ public class NetworkMonitorTest {
    @Test
    public void testOnAvailable() throws IOException, InterruptedException, Exception {
    	   NetworkExecutor executor = new NetworkExecutor();
-   	   boolean[] result = new boolean[1];
+   	   NetworkMonitor.Status[] result = new NetworkMonitor.Status[1];
    	   Exception[] ex = new Exception[1];
    	   CountDownLatch latch = new CountDownLatch(1);
-   	   new NetworkMonitor(executor, (isUp, e) -> {
-   	   
-   	   		   result[0] = true;
-   	   		   ex[0] = e;
+   	   NetworkMonitor monitor = new NetworkMonitor(executor, status -> {
+   	   		   result[0] = status;
    	   		   latch.countDown();
    	   });
    	   latch.await(3, TimeUnit.SECONDS);
-   	   
-   	   assertTrue(result[0]);
-   	   if (ex[0] != null) throw ex[0];
+   	   monitor.terminate();
+   	   assertEquals(NetworkMonitor.Status.UP, result[0]);
    }
    
 }
