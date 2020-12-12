@@ -46,68 +46,31 @@ import static java.net.StandardProtocolFamily.*;
  * @author Michael Sargent
  */
 public class NetworkMonitor {
-	
+	/** The <code>NetworkInterface</code> to monitor. */
 	public final NetworkInterface networkInterface;
+	/** The <code>StandardProtocolFamily</code> to monitor. */
 	public final StandardProtocolFamily protocol;
+	/** The initial delay to wait before monitoring. */
 	public final long initialDelay;
+	/** The period between monitoring updates. */
 	public final long period;
+	/** The <code>TimeUnit</code> of the initialValue and period paramenters. */
 	public final TimeUnit unit;
+	/** An <code>AtomicReference</code> holding the status of this monitor. */
 	public final AtomicReference<Status> status = new AtomicReference<>(Status.PENDING);
 	
-	private final NetworkExecutor nexecutor;
-	private final BiConsumer<Boolean,SocketException> statusListener;
 	private final Consumer<Status> consumer;
 	private final ScheduledFuture<?> future;
 	private final boolean linkLocal;
 	
-	
-	boolean isUp = false;
-	
-	@Deprecated
-	public NetworkMonitor(NetworkExecutor executor, BiConsumer<Boolean,SocketException> statusListener) throws SocketException {
-		
-		this(executor, statusListener, null, 1, 5);
-	}
-	
-	@Deprecated
-	public NetworkMonitor(NetworkExecutor executor, BiConsumer<Boolean,SocketException> statusListener, 
-		NetworkInterface networkInterface, long initialDelay, long period) throws SocketException {
-		
-		this(executor, statusListener, networkInterface, INET, initialDelay, period, TimeUnit.SECONDS, false);
-	}
-	
-	@Deprecated
-	public NetworkMonitor(NetworkExecutor executor, BiConsumer<Boolean,SocketException> statusListener, 
-		NetworkInterface networkInterface, StandardProtocolFamily protocol, long initialDelay, 
-		long period, TimeUnit unit, boolean linkLocal) throws SocketException {
-		
-		this.nexecutor = executor;
-		this.statusListener = statusListener;
-		this.networkInterface = networkInterface == null ? defaultNetworkInterface() : networkInterface;
-		this.protocol = protocol == null ? INET : protocol;
-		this.initialDelay = initialDelay;
-		this.period = period;
-		this.unit = unit;
-		this.linkLocal = linkLocal;
-		isUp = this.networkInterface.isUp();
-		consumer = null;
-		future = executor.scheduleAtFixedRate(() -> {
-				try {
-					if (isUp != networkInterface.isUp()) {
-						isUp = networkInterface.isUp();	
-						statusListener.accept(isUp, null);
-					}
-				} catch (SocketException e) {
-					statusListener.accept(null, e);
-				}
-			}, initialDelay, period, unit);
-		statusListener.accept(isUp, null);
-	}
-	
-	
 	public NetworkMonitor(NetworkExecutor executor, Consumer<Status> consumer) throws SocketException {
-		
 		this(executor, consumer, defaultNetworkInterface(), 100, 5000);
+	}
+	
+	public NetworkMonitor(NetworkExecutor executor, Consumer<Status> consumer, 
+		NetworkInterface networkInterface) {
+		
+		this(executor, consumer, networkInterface, INET, 100, 5000, TimeUnit.MILLISECONDS, false);
 	}
 	
 	public NetworkMonitor(NetworkExecutor executor, Consumer<Status> consumer, 
@@ -120,9 +83,7 @@ public class NetworkMonitor {
 		NetworkInterface networkInterface, StandardProtocolFamily protocol, long initialDelay, 
 		long period, TimeUnit unit, boolean linkLocal) {
 		
-		this.nexecutor = executor;
 		this.consumer = consumer;
-		this.statusListener = null;
 		this.networkInterface = networkInterface;
 		this.protocol = protocol == null ? INET : protocol;
 		this.initialDelay = initialDelay;
@@ -133,6 +94,11 @@ public class NetworkMonitor {
 		future = executor.scheduleAtFixedRate(() -> consumer.accept(update()), initialDelay, period, unit);
 	}
 					
+	/**
+	 * Returns the inet address of the associated with this network monitor.
+	 *
+	 * @return The inet address of the associated with this network monitor.
+	 */
 	public InetAddress inetAddress() {
 		for(Enumeration<InetAddress> e = networkInterface.getInetAddresses(); e.hasMoreElements();){
 			InetAddress a = e.nextElement();
@@ -148,6 +114,9 @@ public class NetworkMonitor {
 		return null;	
 	}
 	
+	/**
+	 * Terminates this network monitor.
+	 */
 	public void terminate() {
 		if(future != null) future.cancel(true);
 	}
