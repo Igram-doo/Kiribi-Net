@@ -12,6 +12,7 @@ Provides classes and interfaces to support NAT transversal and peer-to-peer netw
 * Each UDP peer only requires a single open udp port on the host device. The NAT Transversal Protocol, UDP Communication Protocol and Endpoint Data Transfer Protocol packets are automatically multi-plexed.
 * Encryption between peers is provided by the [Kiribi-Crypto](http://github.com/Igram-doo/Kiribi-Crypto) module.
 * NAT Transversal Server to facilitate UPD Endpoint connection.
+* Support for multi-homed devices.
 
 ### Overview
 Provides classes and interfaces to support NAT transversal and peer-to-peer network communication.
