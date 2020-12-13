@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -108,6 +109,7 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 	private Future<?> activityMonitor;
 	private boolean initialized = false;
 	private int port = -1;
+	private CountDownLatch latch = new CountDownLatch(1);
 	
 	public UDPEndpointProvider(NetworkExecutor executor, Address address, SocketAddress serverAddress) {
 		super(executor);
@@ -135,6 +137,7 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 			// todo
 			LOGGER.log(SEVERE, t.toString(), t);
 		}
+		latch.countDown();
 	}
 
 	private void monitorActivity() {
@@ -176,6 +179,9 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 	public Endpoint open(ConnectionAddress address)
 		throws IOException, InterruptedException {
 
+		// wait for start method to finish
+		latch.await();
+		
 		long id = address.id;
 		Address host = address.address;
 		// result
