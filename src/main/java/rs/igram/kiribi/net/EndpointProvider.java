@@ -26,6 +26,7 @@ package rs.igram.kiribi.net;
 
 import java.io.InterruptedIOException;
 import java.io.IOException;
+import java.net.NoRouteToHostException;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -110,6 +111,8 @@ public abstract class EndpointProvider<A> {
 	 *
 	 * @param address The address associated with the returned endpoint.
 	 * @return Returns an endpoint.
+	 * @throws NoRouteToHostException if this is a <code>UDPEndpointProvider</code> and the address is not 
+	 * registered with the <code>NATTServer</code>.
 	 * @throws IOException if there was a problem opening the endpoint.
 	 * @throws InterruptedException if the provider was interrupted while opening the endpoint.
 	 */

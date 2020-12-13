@@ -202,7 +202,7 @@ public final class NATTProcessor extends Processor {
 
 	//  returned from server after connect if the dst is not registered
 	private void err(byte[] buf) {
-		if(future != null) future.completeExceptionally(new IOException("Address not registered"));
+		if(future != null) future.completeExceptionally(new AddressNotRegisteredException());//("Address not registered"));
 	}
 	
 	public void register(Address address) throws IOException {

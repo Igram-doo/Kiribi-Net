@@ -34,6 +34,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NoRouteToHostException;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -63,6 +64,7 @@ import rs.igram.kiribi.io.VarInputStream;
 import rs.igram.kiribi.io.VarOutput;
 import rs.igram.kiribi.io.VarOutputStream;
 import rs.igram.kiribi.net.stack.*;
+import rs.igram.kiribi.net.stack.natt.AddressNotRegisteredException;
 
 import static rs.igram.kiribi.net.stack.natt.NATTProcessor.SessionEvent;
 import static rs.igram.kiribi.net.stack.natt.NATTProtocol.SessionType.SOCKET;
@@ -246,6 +248,12 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 			endpoint = mux.open(id);
 // TODO ADD CACHE LOOP END			
 		//}
+		
+		}catch(AddressNotRegisteredException e){
+			synchronized(lock){
+				map.remove(host);
+			}
+			throw new NoRouteToHostException("Address not registered");
 		}catch(Exception e){
 			synchronized(lock){
 				map.remove(host);
