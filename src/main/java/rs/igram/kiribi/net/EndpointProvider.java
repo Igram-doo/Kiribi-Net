@@ -102,33 +102,6 @@ public abstract class EndpointProvider<A> {
 	/**
 	 * Returns a server endpoint.
 	 *
-	 * @param socketAddress The inet socket address the returned server endpoint will listen on. This 
-	 * parameter is ignored for <code>UDPEndpointProviders</code>.
-	 * @return Returns a server endpoint.
-	 * @throws IOException if there was a problem opening the server endpoint.
-	 * @throws InterruptedException if the provider was interrupted while opening the server endpoint.
-	 * @throws TimeoutException if the provider timed out while opening the server endpoint.
-	 */
-	@Deprecated
-	public abstract ServerEndpoint open(InetSocketAddress socketAddress) 
-		throws IOException, InterruptedException, TimeoutException;
-
-	/**
-	 * Returns a server endpoint.
-	 *
-	 * @param port The port the returned server endpoint will listen on.
-	 * @return Returns a server endpoint.
-	 * @throws IOException if there was a problem opening the server endpoint.
-	 * @throws InterruptedException if the provider was interrupted while opening the server endpoint.
-	 * @throws TimeoutException if the provider timed out while opening the server endpoint.
-	 */
-	@Deprecated
-	public abstract ServerEndpoint open(int port) 
-		throws IOException, InterruptedException, TimeoutException;
-
-	/**
-	 * Returns a server endpoint.
-	 *
 	 * @return Returns a server endpoint.
 	 * @throws IOException if there was a problem opening the server endpoint.
 	 * @throws InterruptedException if the provider was interrupted while opening the server endpoint.

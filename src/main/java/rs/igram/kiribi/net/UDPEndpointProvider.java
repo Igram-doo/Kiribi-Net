@@ -273,30 +273,6 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 	}
 
 	@Override
-	public synchronized ServerEndpoint open(InetSocketAddress socketAddress)
-		throws IOException, InterruptedException, TimeoutException{
-		
-		if(this.socketAddress != socketAddress){
-		//	if(port != -1){
-		//		shutdown();
-		//	}
-			start();
-		//	this.socketAddress = socketAddress;
-		}
-		
-		return server;
-	}
-
-	@Override
-	public synchronized ServerEndpoint open(int p)
-		throws IOException, InterruptedException, TimeoutException{
-		
-		InetAddress address = NetworkMonitor.inet();
-		if(address == null) throw new IOException("Network unavailable");
-		return open(new InetSocketAddress(address, p));
-	}
-
-	@Override
 	public synchronized ServerEndpoint server()
 		throws IOException, InterruptedException, TimeoutException{
 		

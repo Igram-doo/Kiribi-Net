@@ -69,24 +69,6 @@ final class TCPEndpointProvider extends EndpointProvider<SocketAddress> {
 	}
 
 	@Override
-	public ServerEndpoint open(InetSocketAddress socketAddress)
-		throws IOException, InterruptedException, TimeoutException{
-
-		final AsynchronousServerSocketChannel channel = AsynchronousServerSocketChannel.open();
-		channel.bind(socketAddress);
-		return new ServerChannelEndpoint(channel);
-	}
-
-	@Override
-	public ServerEndpoint open(int port)
-		throws IOException, InterruptedException, TimeoutException{
-
-		final AsynchronousServerSocketChannel channel = AsynchronousServerSocketChannel.open();
-		channel.bind(new InetSocketAddress(port));
-		return new ServerChannelEndpoint(channel);
-	}
-
-	@Override
 	public ServerEndpoint server() 
 		throws IOException, InterruptedException, TimeoutException {
 			
