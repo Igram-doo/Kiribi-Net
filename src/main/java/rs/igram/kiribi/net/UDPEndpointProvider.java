@@ -110,11 +110,10 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 	private DatagramStack stack;
 	private Future<?> activityMonitor;
 	private boolean initialized = false;
-	private int port = -1;
-	private CountDownLatch latch = new CountDownLatch(1);
+	private InetSocketAddress socketAddress;
 	
-	public UDPEndpointProvider(NetworkExecutor executor, Address address, SocketAddress serverAddress) {
-		super(executor);
+	public UDPEndpointProvider(NetworkExecutor executor, InetSocketAddress socketAddress, Address address, SocketAddress serverAddress) {
+		super(executor, socketAddress);
 		
 		this.address = address;
 		this.serverAddress = serverAddress;
@@ -122,12 +121,16 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 		me = address;
 	}
 
-	private void start(int port) {
-		startIPV4(port);
+	private void start() {
+		synchronized(this) {
+			if (initialized) return;
+			startIPV4(socketAddress);
+			initialized = true;
+		}
 	}
 
-	private void startIPV4(int port) {
-		stack = new DatagramIPV4Stack(executor, address, serverAddress, port, (s,b) -> accept(s, b), this::onIncoming, this::onExpired);
+	private void startIPV4(InetSocketAddress socketAddress) {
+		stack = new DatagramIPV4Stack(executor, address, serverAddress, socketAddress, (s,b) -> accept(s, b), this::onIncoming, this::onExpired);
 		stack.configure();
 		stack.start();
 			
@@ -139,7 +142,6 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 			// todo
 			LOGGER.log(SEVERE, t.toString(), t);
 		}
-		latch.countDown();
 	}
 
 	private void monitorActivity() {
@@ -181,8 +183,7 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 	public Endpoint open(ConnectionAddress address)
 		throws IOException, InterruptedException {
 
-		// wait for start method to finish
-		latch.await();
+		start();
 		
 		long id = address.id;
 		Address host = address.address;
@@ -272,38 +273,56 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 	}
 
 	@Override
+	public synchronized ServerEndpoint open(InetSocketAddress socketAddress)
+		throws IOException, InterruptedException, TimeoutException{
+		
+		if(this.socketAddress != socketAddress){
+		//	if(port != -1){
+		//		shutdown();
+		//	}
+			start();
+		//	this.socketAddress = socketAddress;
+		}
+		
+		return server;
+	}
+
+	@Override
 	public synchronized ServerEndpoint open(int p)
 		throws IOException, InterruptedException, TimeoutException{
 		
-		if(port != p){
-			if(port != -1){
-				shutdown();
-			}
-			start(p);
-			port = p;
-		}
+		InetAddress address = NetworkMonitor.inet();
+		if(address == null) throw new IOException("Network unavailable");
+		return open(new InetSocketAddress(address, p));
+	}
+
+	@Override
+	public synchronized ServerEndpoint server()
+		throws IOException, InterruptedException, TimeoutException{
+		
+		start();
 		return server;
 	}
 	
 	@Override
 	public synchronized void shutdown() {
-		muxes.values().forEach(m -> {
-			executor.submit(() -> m.dispose(false));
-		});
-		muxes.clear();
-		// give some time to notify remote peers
-		try{
-			TimeUnit.MILLISECONDS.sleep(300);
-		}catch(Exception z){}
+		synchronized(this) {
+			muxes.values().forEach(m -> {
+				executor.submit(() -> m.dispose(false));
+			});
+			muxes.clear();
+			// give some time to notify remote peers
+			try{
+				TimeUnit.MILLISECONDS.sleep(300);
+			}catch(Exception z){}
 			
-		if(activityMonitor != null) activityMonitor.cancel(true);
-		if(stack != null) stack.shutdown();
+			if(activityMonitor != null) activityMonitor.cancel(true);
+			if(stack != null) stack.shutdown();
 		
-		activityMonitor = null;
-		stack = null;
-		map.clear();
-		
-		port = -1;
+			activityMonitor = null;
+			stack = null;
+			map.clear();
+		}
 	}
 
 	void process(SessionEvent e) {		

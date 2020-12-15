@@ -57,9 +57,10 @@ public final class DatagramIPV4Stack extends DatagramStack {
 	Consumer<NATTProcessor.SessionEvent> listener;
 	NATTProcessor natt;
 	 
-	public DatagramIPV4Stack(NetworkExecutor executor, Address address, SocketAddress serverAddress, int port, BiConsumer<SocketAddress,byte[]> consumer, 
+	public DatagramIPV4Stack(NetworkExecutor executor, Address address, SocketAddress serverAddress, 
+		InetSocketAddress socketAddress, BiConsumer<SocketAddress,byte[]> consumer, 
 		Consumer<SocketAddress> onIncoming, Consumer<Set<SocketAddress>> onExpired) {
-		super(executor, address, serverAddress, StandardProtocolFamily.INET, port, consumer);
+		super(executor, address, serverAddress, StandardProtocolFamily.INET, socketAddress, consumer);
 	}
 
 	@Override
@@ -76,7 +77,7 @@ public final class DatagramIPV4Stack extends DatagramStack {
 			}
 		};
 		
-		natt = new NATTProcessor(serverAddress, port, listener);
+		natt = new NATTProcessor(serverAddress, listener);
 		
 		
 		kap = new KAPProcessor(onIncoming, onExpired);

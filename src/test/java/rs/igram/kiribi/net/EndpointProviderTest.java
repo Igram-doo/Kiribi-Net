@@ -64,7 +64,8 @@ public class EndpointProviderTest {
 		int port = 6732;
 		NetworkExecutor executor = new NetworkExecutor();
 		SocketAddress address = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port);
-		EndpointProvider<SocketAddress> provider = EndpointProvider.tcpProvider(executor);
+		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port);
+		EndpointProvider<SocketAddress> provider = EndpointProvider.tcpProvider(executor, socketAddress);
 		ProviderTest test = new ProviderTest<SocketAddress>(executor, provider, address);
 		test.run(6732);
    	   
@@ -81,7 +82,8 @@ public class EndpointProviderTest {
 //		Address address = new Address(((EC25519PublicKey)key).hash());
 		Address address = new Address(key);
 		SocketAddress serverAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), NATTServer.SERVER_PORT);
-		EndpointProvider<ConnectionAddress> provider = EndpointProvider.udpProvider(executor, address, serverAddress);		
+		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port);
+		EndpointProvider<ConnectionAddress> provider = EndpointProvider.udpProvider(executor, socketAddress, address, serverAddress);		
 		ConnectionAddress connectionAddress = new ConnectionAddress(address, 1l);
 		
 		NATTServer server = new NATTServer();
@@ -124,8 +126,7 @@ public class EndpointProviderTest {
    	   		   availableSignal.countDown();
    	   	//   });
    	   	   availableSignal.await(3, TimeUnit.SECONDS);
-   	   	   
-   	   	   ServerEndpoint se = provider.open(port);
+   	   	   ServerEndpoint se = provider.server();
    	   	   se.accept(this::accept);
    	   	   
    	   	   Endpoint e = provider.open(address);

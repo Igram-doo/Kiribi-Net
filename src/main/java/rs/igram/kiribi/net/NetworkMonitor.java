@@ -27,6 +27,7 @@ package rs.igram.kiribi.net;
 import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.StandardProtocolFamily;
@@ -156,6 +157,17 @@ public class NetworkMonitor {
 			}
 		}
 		return null;	
+	}
+					
+	/**
+	 * Returns the inet socket address of the associated with this network monitor and the given port.
+	 *
+	 * @param port The port of the new socket address.
+	 * @return The inet socket address of the associated with this network monitor and the given port.
+	 */
+	public InetSocketAddress socketAddress(int port) {
+		InetAddress inet = inetAddress();
+		return inet == null ? null : new InetSocketAddress(inet, port);
 	}
 	
 	/**

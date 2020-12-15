@@ -26,6 +26,7 @@ package rs.igram.kiribi.net;
 
 import java.io.InterruptedIOException;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.NoRouteToHostException;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -67,32 +68,50 @@ public abstract class EndpointProvider<A> {
 	
 	final Map<Address,SocketAddress> cache = new HashMap<>();
 	final NetworkExecutor executor;
+	final InetSocketAddress socketAddress;
 	
-	EndpointProvider(NetworkExecutor executor) {
+	EndpointProvider(NetworkExecutor executor, InetSocketAddress socketAddress) {
 		this.executor = executor;
+		this.socketAddress = socketAddress;
 	}
 		
 	/**
 	 * Returns a udp endpoint provider.
 	 *
-	 * @param executor The executor the returned endpoint provider will use.
+	 * @param executor The executor the returned endpoint provider will use.	 
+	 * @param socketAddress The socket address this endpoint provider will use.
 	 * @param address The address the returned endpoint provider will use.
-	 * @param socketAddress The socket address of the NATT server the returned endpoint provider will use.
+	 * @param nattAddress The socket address of the NATT server the returned endpoint provider will use.
 	 * @return Returns a udp endpoint provider.
 	 */
-	public static EndpointProvider<ConnectionAddress> udpProvider(NetworkExecutor executor, Address address, SocketAddress socketAddress) {
-		return new UDPEndpointProvider(executor, address, socketAddress);
+	public static EndpointProvider<ConnectionAddress> udpProvider(NetworkExecutor executor, InetSocketAddress socketAddress, Address address, SocketAddress nattAddress) {
+		return new UDPEndpointProvider(executor, socketAddress, address, nattAddress);
 	}
 	
 	/**
 	 * Returns a tcp endpoint provider.
 	 *
 	 * @param executor The executor the returned endpoint provider will use.
+	 * @param socketAddress The socket address this endpoint provider will use.
 	 * @return Returns a tcp endpoint provider.
 	 */
-	public static EndpointProvider<SocketAddress> tcpProvider(NetworkExecutor executor) {
-		return new TCPEndpointProvider(executor);
+	public static EndpointProvider<SocketAddress> tcpProvider(NetworkExecutor executor, InetSocketAddress socketAddress) {
+		return new TCPEndpointProvider(executor, socketAddress);
 	}
+
+	/**
+	 * Returns a server endpoint.
+	 *
+	 * @param socketAddress The inet socket address the returned server endpoint will listen on. This 
+	 * parameter is ignored for <code>UDPEndpointProviders</code>.
+	 * @return Returns a server endpoint.
+	 * @throws IOException if there was a problem opening the server endpoint.
+	 * @throws InterruptedException if the provider was interrupted while opening the server endpoint.
+	 * @throws TimeoutException if the provider timed out while opening the server endpoint.
+	 */
+	@Deprecated
+	public abstract ServerEndpoint open(InetSocketAddress socketAddress) 
+		throws IOException, InterruptedException, TimeoutException;
 
 	/**
 	 * Returns a server endpoint.
@@ -103,7 +122,19 @@ public abstract class EndpointProvider<A> {
 	 * @throws InterruptedException if the provider was interrupted while opening the server endpoint.
 	 * @throws TimeoutException if the provider timed out while opening the server endpoint.
 	 */
+	@Deprecated
 	public abstract ServerEndpoint open(int port) 
+		throws IOException, InterruptedException, TimeoutException;
+
+	/**
+	 * Returns a server endpoint.
+	 *
+	 * @return Returns a server endpoint.
+	 * @throws IOException if there was a problem opening the server endpoint.
+	 * @throws InterruptedException if the provider was interrupted while opening the server endpoint.
+	 * @throws TimeoutException if the provider timed out while opening the server endpoint.
+	 */
+	public abstract ServerEndpoint server() 
 		throws IOException, InterruptedException, TimeoutException;
 
 	/**

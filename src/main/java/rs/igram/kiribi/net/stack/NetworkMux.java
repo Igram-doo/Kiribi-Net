@@ -45,7 +45,6 @@ import java.util.logging.Logger;
 
 import rs.igram.kiribi.net.NetworkExecutor;
 import rs.igram.kiribi.net.Address;
-import rs.igram.kiribi.net.NetworkMonitor;
 
 import static rs.igram.kiribi.net.stack.NetworkProtocol.*;
 import static rs.igram.kiribi.io.ByteUtils.*;
@@ -82,13 +81,9 @@ public class NetworkMux {
 		this.executor = executor;
 	}
 	
-	protected InetSocketAddress start(int port) {
+	protected InetSocketAddress start(InetSocketAddress inet) {
 		executor.onShutdown(6, this::shutdown);
-		InetAddress address = NetworkMonitor.inet();
-		if(address == null) return null;
-		InetSocketAddress inet = null;
 		try{
-			inet = new InetSocketAddress(address, port);
 			socket = new DatagramSocket(inet);
 			socket.setReceiveBufferSize(MAX_UDP_BUF_SIZE);
 			socket.setSendBufferSize(MAX_UDP_BUF_SIZE);

@@ -87,14 +87,15 @@ public final class NATTProcessor extends Processor {
 	long start;
 	int port;
 	
-	public NATTProcessor(SocketAddress server, int port, Consumer<SessionEvent> listener) {
+//	public NATTProcessor(SocketAddress server, int port, Consumer<SessionEvent> listener) {
+	public NATTProcessor(SocketAddress server, Consumer<SessionEvent> listener) {
 		super(NetworkProtocol.NATT_PROTOCOL);
 		
 		this.server = server;
 		this.listener = listener;
-		this.port = port;
+//		this.port = port;
 		
-		LOGGER.log(FINE, "NATTClient started on port: {0}...", port);
+//		LOGGER.log(FINE, "NATTClient started on port: {0}...", port);
 	}
 	
 	void notify(SessionEvent e) {

@@ -49,8 +49,10 @@ import static java.util.logging.Level.*;
 final class TCPEndpointProvider extends EndpointProvider<SocketAddress> {
 	private static final Logger LOGGER = Logger.getLogger(TCPEndpointProvider.class.getName());
 	
-	public TCPEndpointProvider(NetworkExecutor executor) {
-		super(executor);
+	private ServerChannelEndpoint server;
+	
+	public TCPEndpointProvider(NetworkExecutor executor, InetSocketAddress socketAddress) {
+		super(executor, socketAddress);
 	}
 
 	@Override
@@ -67,12 +69,34 @@ final class TCPEndpointProvider extends EndpointProvider<SocketAddress> {
 	}
 
 	@Override
+	public ServerEndpoint open(InetSocketAddress socketAddress)
+		throws IOException, InterruptedException, TimeoutException{
+
+		final AsynchronousServerSocketChannel channel = AsynchronousServerSocketChannel.open();
+		channel.bind(socketAddress);
+		return new ServerChannelEndpoint(channel);
+	}
+
+	@Override
 	public ServerEndpoint open(int port)
 		throws IOException, InterruptedException, TimeoutException{
 
 		final AsynchronousServerSocketChannel channel = AsynchronousServerSocketChannel.open();
 		channel.bind(new InetSocketAddress(port));
 		return new ServerChannelEndpoint(channel);
+	}
+
+	@Override
+	public ServerEndpoint server() 
+		throws IOException, InterruptedException, TimeoutException {
+			
+		if (server == null || !server.isOpen())  {			
+			final AsynchronousServerSocketChannel channel = AsynchronousServerSocketChannel.open();
+			channel.bind(socketAddress);
+			server =  new ServerChannelEndpoint(channel);	
+		}
+		
+		return server;
 	}
 
 	private static class ChannelEndpoint extends SecureEndpoint {
