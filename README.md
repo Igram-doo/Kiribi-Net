@@ -97,4 +97,3 @@ Provides static methods to monitor network availability.
 * Add link to check if router supports NAT transversal.
 * Add blurb about router configuration.
 * Add multicast discovery for use on a LAN.
-* SCTP EndpointProvider implementation.
