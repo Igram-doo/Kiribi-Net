@@ -58,9 +58,11 @@ public final class Lookup {
 		VarOutputStream out = new VarOutputStream();
 		out.write(REGISTER);
 		out.write(address);
+		out.writeAddress(provider.socketAddress);
 		EncodableBytes bytes = new EncodableBytes(out.toByteArray());
 		Endpoint endpoint = open();
 		endpoint.write(bytes);
+		
 		EncodableBytes response = endpoint.read(EncodableBytes::new);
 		endpoint.close();
 		
@@ -68,7 +70,7 @@ public final class Lookup {
 		byte b = in.readByte();
 		if (b != ACK) {
 			throw new IOException(in.readUTF());
-		}
+		}		
 	}
 	
 	public void unregister() throws IOException, InterruptedException {
@@ -90,7 +92,7 @@ public final class Lookup {
 	
 	public SocketAddress lookup(Address address) throws IOException, InterruptedException {
 		VarOutputStream out = new VarOutputStream();
-		out.write(UNREGISTER);
+		out.write(LOOKUP);
 		out.write(address);
 		EncodableBytes bytes = new EncodableBytes(out.toByteArray());
 		Endpoint endpoint = open();
@@ -100,6 +102,7 @@ public final class Lookup {
 		
 		VarInputStream in = new VarInputStream(response.bytes());
 		byte b = in.readByte();
+		
 		switch(b){
 		case ACK: return in.readAddress();
 		case UNKNOWN: return null;

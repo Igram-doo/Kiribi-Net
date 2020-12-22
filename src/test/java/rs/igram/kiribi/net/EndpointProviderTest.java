@@ -51,6 +51,8 @@ import rs.igram.kiribi.crypto.EC25519PublicKey;
 import rs.igram.kiribi.crypto.KeyPairGenerator;
 import rs.igram.kiribi.io.*;
 import rs.igram.kiribi.net.natt.NATTServer;
+import rs.igram.kiribi.net.lookup.LookupServer;
+import rs.igram.kiribi.net.stack.lookup.*;
 
 /**
  * 
@@ -58,6 +60,35 @@ import rs.igram.kiribi.net.natt.NATTServer;
  * @author Michael Sargent
  */
 public class EndpointProviderTest {
+	
+	@Test
+	public void testLookup() throws IOException, InterruptedException, Exception {
+		// lookup server
+		int port1 = 6730;
+		NetworkExecutor executor1 = new NetworkExecutor();
+		InetSocketAddress socketAddress1 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port1);
+		EndpointProvider<SocketAddress> provider1 = EndpointProvider.tcpProvider(executor1, socketAddress1);
+   	    LookupServer server = new LookupServer(provider1);
+   	    server.start();
+   	    
+   	    //lookup
+   	    PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
+		Address address = new Address(key);
+   	    int port2 = 6731;
+		NetworkExecutor executor2 = new NetworkExecutor();
+		InetSocketAddress socketAddress2 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port2);
+		EndpointProvider<SocketAddress> provider2 = EndpointProvider.tcpProvider(executor2, socketAddress2);		
+		Lookup lookup = new Lookup(address, socketAddress1, provider2);
+		
+		assertNull(lookup.lookup(address));
+		
+		lookup.register();
+		assertEquals(socketAddress2, lookup.lookup(address));
+		
+		lookup.unregister();
+		assertNull(lookup.lookup(address));
+		//Thread.sleep(1000);
+	}
 	
 	@Test
 	public void testTCP() throws IOException, InterruptedException, Exception {
@@ -79,7 +110,6 @@ public class EndpointProviderTest {
 		int port = 6733;
 		NetworkExecutor executor = new NetworkExecutor();
 		PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
-//		Address address = new Address(((EC25519PublicKey)key).hash());
 		Address address = new Address(key);
 		SocketAddress serverAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), NATTServer.SERVER_PORT);
 		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port);

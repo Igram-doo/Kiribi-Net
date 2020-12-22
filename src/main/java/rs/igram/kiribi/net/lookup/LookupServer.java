@@ -43,7 +43,7 @@ import rs.igram.kiribi.net.ServerEndpoint;
 import static rs.igram.kiribi.net.stack.lookup.LookupProtocol.*;
 
 /**
- * 
+ * Simple Lookup server.
  *
  * @author Michael Sargent
  */
@@ -51,16 +51,47 @@ public final class LookupServer {
 	private final EndpointProvider<SocketAddress> provider;
 	private final Map<Address, InetSocketAddress> cache = Collections.synchronizedMap(new HashMap<Address, InetSocketAddress>());
 	
+	private  boolean started = false;
 	private ServerEndpoint server;
 	
+	/**
+	 * Instantiates a new <code>LookupServer</code> instance.
+	 *
+	 * @param provider The address <code>EndpointProvider</code> associated with this lookup server instance.
+	 */
 	public LookupServer(EndpointProvider<SocketAddress> provider) {
 		this.provider = provider;
 	}
 	
-	public void listen()  throws IOException, InterruptedException, TimeoutException {
-		server = provider.server();
-		server.accept(this::accept);
+	/**
+	 * Starts this <code>LookupServer</code> instance.
+	 *
+	 * @throws IOException if there was a problem starting this <code>LookupServer</code> instance.
+	 */
+	public void start() throws IOException {
+		synchronized (this) {
+			if (started) return;
+			try {
+				server = provider.server();
+				server.accept(this::accept);
+			} catch(TimeoutException e) {
+				throw new IOException(e);
+			} catch(InterruptedException e) {
+				// shutdown - ignore
+			}
+			started = true;
+		}
 	}
+	
+	/**
+	 * Evicts an address from this <code>LookupServer</code> instance.
+	 *
+	 * @param address The address to evict.
+	 */
+	public void evict(Address address) {
+		cache.remove(address);
+	}
+
 	
 	private void accept(Endpoint endpoint) {
 		try{
@@ -69,11 +100,53 @@ public final class LookupServer {
 			VarInputStream in = new VarInputStream(request.bytes());
 			byte b = in.readByte();
 			Address address = in.read(Address::new);
-			InetSocketAddress socketAddress = null;
+			InetSocketAddress socketAddress = b == REGISTER ? in.readAddress() : null;
 			
 			switch(b) {
 			case REGISTER:
-				socketAddress = (InetSocketAddress)endpoint.remote();
+				cache.put(address, socketAddress);
+				endpoint.write(ack());
+				break;
+			case UNREGISTER:
+				cache.remove(address);
+				endpoint.write(ack());
+				break;
+			case LOOKUP:
+				socketAddress = cache.get(address);
+				endpoint.write(response(socketAddress));
+				break;
+			}	
+			
+		} catch(IOException e) {
+			e.printStackTrace();
+			// to do
+		}
+		
+	}
+	/*
+	private void read(Endpoint endpoint) {
+		try{
+			while (endpoint.isOpen() && !Thread.currentThread().isInterrupted()) {
+				EncodableBytes request = endpoint.read(EncodableBytes::new);
+		
+				VarInputStream in = new VarInputStream(request.bytes());
+				byte b = in.readByte();
+				Address address = in.read(Address::new);
+				InetSocketAddress socketAddress = b == REGISTER ? in.readAddress() : null;
+				provider.executor.submit(() -> write(b, address, socketAddress, endpoint));
+			}	
+		} catch(IOException e) {
+			e.printStackTrace();
+			// to do
+		}
+	}
+	
+	private void write(byte b, Address address, InetSocketAddress socketAddress, Endpoint endpoint) {
+		try{
+			
+			
+			switch(b) {
+			case REGISTER:
 				cache.put(address, socketAddress);
 				endpoint.write(ack());
 				break;
@@ -87,10 +160,14 @@ public final class LookupServer {
 				break;
 			}	
 		} catch(IOException e) {
+			e.printStackTrace();
+			// to do
+		} catch(Exception e) {
+			e.printStackTrace();
 			// to do
 		}
 	}
-	
+	*/
 	private static EncodableBytes ack() throws IOException {
 		return new EncodableBytes(new byte[]{ACK});
 	}

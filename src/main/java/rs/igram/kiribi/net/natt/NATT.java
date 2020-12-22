@@ -110,12 +110,6 @@ abstract class NATT {
 	 * Instantiates a new <code>NATT</code> instance.
 	 */
 	 protected NATT() {}
-	 
-	/*
-	public void start(int port) {
-		start(internal(), port);
-	}
-	*/
 	
 	/**
 	 * Starts this <code>NATT</code> instance.

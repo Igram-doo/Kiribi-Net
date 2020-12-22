@@ -54,8 +54,9 @@ public interface Endpoint extends EncodedStream {
 	 * Returns the remote <code>SocketAddress</code> this enpoint is connected to.
 	 *
 	 * @return The remote <code>SocketAddress</code> this enpoint is connected to.
+	 * @throws IOException if there was a problem determining the remote socket address.
 	 */
-	default SocketAddress remote() {
+	default SocketAddress remote() throws IOException {
 		throw new UnsupportedOperationException();
 	}
 	

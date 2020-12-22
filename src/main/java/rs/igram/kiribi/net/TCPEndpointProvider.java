@@ -61,6 +61,7 @@ final class TCPEndpointProvider extends EndpointProvider<SocketAddress> {
 
 		final AsynchronousSocketChannel channel = AsynchronousSocketChannel.open();
 		try{
+			//channel.bind​(SocketAddress local)
 			channel.connect(address).get();
 			return new ChannelEndpoint(channel).connect(true);
 		}catch(Exception e){
@@ -109,6 +110,10 @@ final class TCPEndpointProvider extends EndpointProvider<SocketAddress> {
 		@Override
 		public void close() throws IOException {
 			if(channel != null && channel.isOpen()) channel.close();
+		}
+		
+		public SocketAddress remote() throws IOException {
+			return channel.getRemoteAddress();
 		}
 	}
 
