@@ -67,7 +67,10 @@ public abstract class EndpointProvider<A> {
 	private static final Logger LOGGER = Logger.getLogger(EndpointProvider.class.getName());
 	
 	final Map<Address,SocketAddress> cache = new HashMap<>();
+	
+	/** The executor associated with this endpoint provider. */
 	public final NetworkExecutor executor;
+	/** The socket address associated with this endpoint provider. */
 	public final InetSocketAddress socketAddress;
 	
 	EndpointProvider(NetworkExecutor executor, InetSocketAddress socketAddress) {
