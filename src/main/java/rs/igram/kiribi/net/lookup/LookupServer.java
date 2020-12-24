@@ -91,7 +91,6 @@ public final class LookupServer {
 	public void evict(Address address) {
 		cache.remove(address);
 	}
-
 	
 	private void accept(Endpoint endpoint) {
 		try{
@@ -123,51 +122,7 @@ public final class LookupServer {
 		}
 		
 	}
-	/*
-	private void read(Endpoint endpoint) {
-		try{
-			while (endpoint.isOpen() && !Thread.currentThread().isInterrupted()) {
-				EncodableBytes request = endpoint.read(EncodableBytes::new);
-		
-				VarInputStream in = new VarInputStream(request.bytes());
-				byte b = in.readByte();
-				Address address = in.read(Address::new);
-				InetSocketAddress socketAddress = b == REGISTER ? in.readAddress() : null;
-				provider.executor.submit(() -> write(b, address, socketAddress, endpoint));
-			}	
-		} catch(IOException e) {
-			e.printStackTrace();
-			// to do
-		}
-	}
-	
-	private void write(byte b, Address address, InetSocketAddress socketAddress, Endpoint endpoint) {
-		try{
-			
-			
-			switch(b) {
-			case REGISTER:
-				cache.put(address, socketAddress);
-				endpoint.write(ack());
-				break;
-			case UNREGISTER:
-				cache.remove(address);
-				endpoint.write(ack());
-				break;
-			case LOOKUP:
-				socketAddress = cache.get(address);
-				endpoint.write(response(socketAddress));
-				break;
-			}	
-		} catch(IOException e) {
-			e.printStackTrace();
-			// to do
-		} catch(Exception e) {
-			e.printStackTrace();
-			// to do
-		}
-	}
-	*/
+
 	private static EncodableBytes ack() throws IOException {
 		return new EncodableBytes(new byte[]{ACK});
 	}

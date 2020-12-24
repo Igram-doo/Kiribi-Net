@@ -24,21 +24,16 @@
  
 package rs.igram.kiribi.net.natt;
 
-import java.io.*;
-import java.io.Console;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.*;
-import java.net.Inet4Address;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.net.*;
-import java.util.Enumeration;
-import java.util.*;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
@@ -84,16 +79,6 @@ abstract class NATT {
 	public static final int SERVER_PORT = 6732;
 	static final int KA_PORT = 6733;
 	
-	/*
-	static final SocketAddress SERVER_ADDRESS ;
-	static{
-		try{
-			SERVER_ADDRESS = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), SERVER_PORT);	
-		}catch(Exception e){
-			throw new RuntimeException("Couldn't set server address", e);
-		}
-	}
-	*/
 	static final long KA_INTERVAL = 24*1000;	
 	//static final DatagramPacket KA_PACKET = new DatagramPacket(KA_DATA, 2, SERVER_ADDRESS);
 	static final int PACKET_SIZE = 1472;
@@ -104,8 +89,6 @@ abstract class NATT {
 	DatagramSocket socket;
 	Future<?> reader;
 	
-	private static final String OS = System.getProperty("os.name", "unknown");
-	
 	/**
 	 * Instantiates a new <code>NATT</code> instance.
 	 */
@@ -114,9 +97,27 @@ abstract class NATT {
 	/**
 	 * Starts this <code>NATT</code> instance.
 	 *
+	 * @param addr The inet socket address to listen on.
+	 * @throws SocketException if there was a preblem starting this NAT server.
+	 */
+	public void start(InetSocketAddress addr) throws SocketException {
+		NetworkExecutor executor = new NetworkExecutor();
+		executor.onShutdown(6, this::shutdown);
+		
+		socket = new DatagramSocket(addr);
+		socket.setReceiveBufferSize(MAX_UDP_BUF_SIZE);
+		socket.setSendBufferSize(MAX_UDP_BUF_SIZE);
+			
+		reader = executor.submit(this::read);
+	}
+	
+	/**
+	 * Starts this <code>NATT</code> instance.
+	 *
 	 * @param addr The inet address to listen on.
 	 * @param port The port to listen on.
 	 */
+	@Deprecated
 	public void start(InetAddress addr, int port) {
 		NetworkExecutor executor = new NetworkExecutor();
 		executor.onShutdown(6, this::shutdown);
@@ -149,7 +150,7 @@ abstract class NATT {
 		}
 	}
 	
-	void write(DatagramPacket p){
+	void write(DatagramPacket p) {
 		try{
 			socket.send(p);
 		}catch(IOException e){
@@ -157,7 +158,7 @@ abstract class NATT {
 		}
 	}
 
-	void write(byte[] buf, SocketAddress address){
+	void write(byte[] buf, SocketAddress address) {
 		try{
 			socket.send(new DatagramPacket(buf, buf.length, address));
 		}catch(IOException e){
@@ -181,7 +182,7 @@ abstract class NATT {
 		System.arraycopy(address.encodeUnchecked(), 0, b, OFF_DATA, 20);
 	}
 	
-	static void inet(byte[] b, SocketAddress address) throws Exception {
+	static void inet(byte[] b, SocketAddress address) {
 		InetSocketAddress inet = ((InetSocketAddress)address);
 		if(inet.getAddress() instanceof Inet6Address){
 			System.arraycopy(inet.getAddress().getAddress(), 0, b, OFF_DATA, 16);
@@ -221,29 +222,7 @@ abstract class NATT {
 		int port = getInt(src, OFF_DATA + 16);
 		return new InetSocketAddress(add, port);
 	}
-   
-	static InetAddress internal() {
-		try{
-			for(Enumeration<NetworkInterface> e1 = NetworkInterface.getNetworkInterfaces(); e1.hasMoreElements();){
-				NetworkInterface i = e1.nextElement();
-				 if(!i.isLoopback() && i.isUp() && !i.toString().contains("Teredo") && !i.isVirtual()){
-					for(Enumeration<InetAddress> e2 = i.getInetAddresses(); e2.hasMoreElements();){
-						InetAddress a = e2.nextElement();
-						if(a instanceof Inet4Address && !a.isLinkLocalAddress()){
-							return a;
-						}
-					}
-				}
-			}			
-		}catch(Exception e){
-			// ignore
-		}
-		
-		return null;
-	}
 	
-	static void print(byte[] buf, SocketAddress address) {}
-		
 	/**
 	 * Shuts down this <code>NATT</code> instance.
 	 */

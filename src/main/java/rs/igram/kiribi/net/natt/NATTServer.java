@@ -24,14 +24,11 @@
  
 package rs.igram.kiribi.net.natt;
 
-import java.io.*;
-import java.io.IOException;
-import java.nio.*;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.net.*;
-import java.util.*;
+import java.net.DatagramPacket;
+import java.net.SocketAddress;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import rs.igram.kiribi.net.Address;
 
@@ -58,7 +55,7 @@ public final class NATTServer extends NATT {
 	}
 	
 	@Override
-	void process(DatagramPacket p){
+	void process(DatagramPacket p) {
 		byte[] buf = p.getData();
 		byte protocol = protocol(buf); 
 		// keepalive
@@ -71,38 +68,35 @@ public final class NATTServer extends NATT {
 		SocketAddress remote = p.getSocketAddress();		
 		
 		int c = buf[OFF_CMD]; // offset long session id + long natt id
-		try{
-			Address address = address(buf); //reg address or tunnel address
+	
+		Address address = address(buf); //reg address or tunnel address
 			
-			switch(c){
-			case REG: // registration request from remote peer
-				map.put(address, remote);
-				cmd(buf, ADR);
-				inet(buf, remote);
+		switch(c){
+		case REG: // registration request from remote peer
+			map.put(address, remote);
+			cmd(buf, ADR);
+			inet(buf, remote);
+			write(buf, remote);
+			break;
+		case CON: // tunnel request from remote peer
+			SocketAddress dst = map.get(address);
+			if(dst == null){
+				// tunnel address not registered
+				cmd(buf, ERR);
 				write(buf, remote);
-				break;
-			case CON: // tunnel request from remote peer
-				SocketAddress dst = map.get(address);
-				if(dst == null){
-					// tunnel address not registered
-					cmd(buf, ERR);
-					write(buf, remote);
-				}else{
-					// notify dest of tunnel request
-					cmd(buf, TUN);
-					inet(buf, remote);
-					write(buf, dst);
-					// notify src of dst socket address
-					cmd(buf, ADC);
-					inet(buf, dst);
-					write(buf, remote);
-				}
-				break;
-			default: 
-				break;
+			}else{
+				// notify dest of tunnel request
+				cmd(buf, TUN);
+				inet(buf, remote);
+				write(buf, dst);
+				// notify src of dst socket address
+				cmd(buf, ADC);
+				inet(buf, dst);
+				write(buf, remote);
 			}
-		}catch(Exception e){
-			// ignore
+			break;
+		default: 
+			break;
 		}
 	}
 }

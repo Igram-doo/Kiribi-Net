@@ -117,7 +117,7 @@ public class EndpointProviderTest {
 		ConnectionAddress connectionAddress = new ConnectionAddress(address, 1l);
 		
 		NATTServer server = new NATTServer();
-   	   	server.start(InetAddress.getByName("127.0.0.1"), NATTServer.SERVER_PORT);
+   	   	server.start(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), NATTServer.SERVER_PORT));
    	   	
 		ProviderTest test = new ProviderTest<ConnectionAddress>(executor, provider, connectionAddress);
 		test.run(port);
