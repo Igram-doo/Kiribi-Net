@@ -65,29 +65,26 @@ public class EndpointProviderTest {
 	public void testLookup() throws IOException, InterruptedException, Exception {
 		// lookup server
 		int port1 = 6730;
-		NetworkExecutor executor1 = new NetworkExecutor();
-		InetSocketAddress socketAddress1 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port1);
-		EndpointProvider<SocketAddress> provider1 = EndpointProvider.tcpProvider(executor1, socketAddress1);
-   	    LookupServer server = new LookupServer(provider1);
-   	    server.start();
+		InetSocketAddress lookupAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port1);
+   	    LookupServer server = new LookupServer();
+   	    server.start(lookupAddress);
    	    
    	    //lookup
    	    PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
 		Address address = new Address(key);
    	    int port2 = 6731;
-		NetworkExecutor executor2 = new NetworkExecutor();
-		InetSocketAddress socketAddress2 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port2);
-		EndpointProvider<SocketAddress> provider2 = EndpointProvider.tcpProvider(executor2, socketAddress2);		
-		Lookup lookup = new Lookup(address, socketAddress1, provider2);
+		NetworkExecutor executor = new NetworkExecutor();
+		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port2);
+		EndpointProvider<SocketAddress> provider = EndpointProvider.tcpProvider(executor, socketAddress);		
+		Lookup lookup = new Lookup(address, lookupAddress, provider);
 		
 		assertNull(lookup.lookup(address));
 		
 		lookup.register();
-		assertEquals(socketAddress2, lookup.lookup(address));
+		assertEquals(socketAddress, lookup.lookup(address));
 		
 		lookup.unregister();
 		assertNull(lookup.lookup(address));
-		//Thread.sleep(1000);
 	}
 	
 	@Test

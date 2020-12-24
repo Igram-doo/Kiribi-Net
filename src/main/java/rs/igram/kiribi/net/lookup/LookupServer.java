@@ -37,7 +37,7 @@ import rs.igram.kiribi.io.VarInputStream;
 import rs.igram.kiribi.io.VarOutputStream;
 import rs.igram.kiribi.net.Address;
 import rs.igram.kiribi.net.Endpoint;
-import rs.igram.kiribi.net.EndpointProvider;
+import rs.igram.kiribi.net.TCPEndpointFactory;
 import rs.igram.kiribi.net.ServerEndpoint;
 
 import static rs.igram.kiribi.net.stack.lookup.LookupProtocol.*;
@@ -48,7 +48,6 @@ import static rs.igram.kiribi.net.stack.lookup.LookupProtocol.*;
  * @author Michael Sargent
  */
 public final class LookupServer {
-	private final EndpointProvider<SocketAddress> provider;
 	private final Map<Address, InetSocketAddress> cache = Collections.synchronizedMap(new HashMap<Address, InetSocketAddress>());
 	
 	private  boolean started = false;
@@ -57,28 +56,21 @@ public final class LookupServer {
 	/**
 	 * Instantiates a new <code>LookupServer</code> instance.
 	 *
-	 * @param provider The address <code>EndpointProvider</code> associated with this lookup server instance.
 	 */
-	public LookupServer(EndpointProvider<SocketAddress> provider) {
-		this.provider = provider;
-	}
+	public LookupServer() {}
 	
 	/**
 	 * Starts this <code>LookupServer</code> instance.
 	 *
+	 * @param addr The inet socket address to listen on.
 	 * @throws IOException if there was a problem starting this <code>LookupServer</code> instance.
 	 */
-	public void start() throws IOException {
+	public void start(InetSocketAddress addr) throws IOException {
 		synchronized (this) {
 			if (started) return;
-			try {
-				server = provider.server();
-				server.accept(this::accept);
-			} catch(TimeoutException e) {
-				throw new IOException(e);
-			} catch(InterruptedException e) {
-				// shutdown - ignore
-			}
+			
+			server = TCPEndpointFactory.server(addr);
+			server.accept(this::accept);
 			started = true;
 		}
 	}

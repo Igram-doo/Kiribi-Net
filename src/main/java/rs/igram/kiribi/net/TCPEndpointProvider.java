@@ -27,19 +27,7 @@ package rs.igram.kiribi.net;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.nio.channels.AcceptPendingException;
-import java.nio.channels.AsynchronousServerSocketChannel;
-import java.nio.channels.AsynchronousSocketChannel;
-import java.nio.channels.Channels;
-import java.nio.channels.CompletionHandler;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
-import java.util.logging.Logger;
-
-import rs.igram.kiribi.io.VarInputStream;
-import rs.igram.kiribi.io.VarOutputStream;
-
-import static java.util.logging.Level.*;
 
 /**
  * 
@@ -47,9 +35,8 @@ import static java.util.logging.Level.*;
  * @author Michael Sargent
  */
 final class TCPEndpointProvider extends EndpointProvider<SocketAddress> {
-	private static final Logger LOGGER = Logger.getLogger(TCPEndpointProvider.class.getName());
 	
-	private ServerChannelEndpoint server;
+	private ServerEndpoint server;
 	
 	public TCPEndpointProvider(NetworkExecutor executor, InetSocketAddress socketAddress) {
 		super(executor, socketAddress);
@@ -59,11 +46,8 @@ final class TCPEndpointProvider extends EndpointProvider<SocketAddress> {
 	public Endpoint open(SocketAddress address)
 		throws IOException, InterruptedException {
 
-		final AsynchronousSocketChannel channel = AsynchronousSocketChannel.open();
 		try{
-			//channel.bind​(SocketAddress local)
-			channel.connect(address).get();
-			return new ChannelEndpoint(channel).connect(true);
+			return TCPEndpointFactory.open(address);
 		}catch(Exception e){
 			throw new IOException(e);
 		}
@@ -73,89 +57,10 @@ final class TCPEndpointProvider extends EndpointProvider<SocketAddress> {
 	public ServerEndpoint server() 
 		throws IOException, InterruptedException, TimeoutException {
 			
-		if (server == null || !server.isOpen())  {			
-			final AsynchronousServerSocketChannel channel = AsynchronousServerSocketChannel.open();
-			channel.bind(socketAddress);
-			server =  new ServerChannelEndpoint(channel);	
+		if (server == null || !server.isOpen())  {		
+			server =  TCPEndpointFactory.server(socketAddress);
 		}
 		
 		return server;
-	}
-
-	private static class ChannelEndpoint extends SecureEndpoint {
-		private AsynchronousSocketChannel channel;
-		private VarInputStream in;
-		private VarOutputStream out;
-
-		ChannelEndpoint(AsynchronousSocketChannel channel) {
-			this.channel = channel;
-			in = new VarInputStream(Channels.newInputStream(channel));
-			out = new VarOutputStream(Channels.newOutputStream(channel));
-		}
-
-		@Override
-		protected void writeRaw(byte[] b) throws IOException {
-			out.writeBytes(b);
-			out.flush();
-		}
-		
-		@Override
-		protected byte[] readRaw() throws IOException {
-			return in.readBytes();
-		}
-
-		@Override
-		public boolean isOpen() {return channel.isOpen();}
-
-		@Override
-		public void close() throws IOException {
-			if(channel != null && channel.isOpen()) channel.close();
-		}
-		
-		public SocketAddress remote() throws IOException {
-			return channel.getRemoteAddress();
-		}
-	}
-
-	private static class ServerChannelEndpoint implements ServerEndpoint {
-		AsynchronousServerSocketChannel channel;
-
-		ServerChannelEndpoint(AsynchronousServerSocketChannel channel) {
-			this.channel = channel;
-		}
-
-		@Override
-		public void accept(Consumer<Endpoint> consumer) throws IOException {
-			try{
-				if(channel.isOpen()){
-					channel.accept(null, new CompletionHandler<AsynchronousSocketChannel, Object>() {
-						@Override
-						public void completed(final AsynchronousSocketChannel c, Object attachment) {
-							if(channel.isOpen()){
-								channel.accept(null, this);
-							}
-							try{
-								Endpoint endpoint = new ChannelEndpoint(c).connect(false);
-								consumer.accept(endpoint);
-							}catch(IOException e){
-								// couldn't connect - chuck
-							}
-						}
-						@Override
-						public void failed(Throwable t, Object attachment) {
-							if(channel.isOpen()) channel.accept(null, this);
-						}
-					});
-				}
-			}catch(AcceptPendingException e) {
-				// ignore
-			}
-		}
-
-		@Override
-		public boolean isOpen() {return channel.isOpen();}
-
-		@Override
-		public void close() throws IOException {channel.close();}
 	}
 }
