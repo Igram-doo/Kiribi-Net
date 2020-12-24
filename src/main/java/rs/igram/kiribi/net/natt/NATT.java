@@ -110,27 +110,6 @@ abstract class NATT {
 			
 		reader = executor.submit(this::read);
 	}
-	
-	/**
-	 * Starts this <code>NATT</code> instance.
-	 *
-	 * @param addr The inet address to listen on.
-	 * @param port The port to listen on.
-	 */
-	@Deprecated
-	public void start(InetAddress addr, int port) {
-		NetworkExecutor executor = new NetworkExecutor();
-		executor.onShutdown(6, this::shutdown);
-		try{
-			socket = new DatagramSocket(new InetSocketAddress(addr, port));
-			socket.setReceiveBufferSize(MAX_UDP_BUF_SIZE);
-			socket.setSendBufferSize(MAX_UDP_BUF_SIZE);
-			
-			reader = executor.submit(this::read);
-		}catch(Throwable e){
-			LOGGER.log(SEVERE, e.toString(), e);
-		}
-	}
 
 	abstract void process(DatagramPacket p);
 	
