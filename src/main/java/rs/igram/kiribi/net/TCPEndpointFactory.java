@@ -39,7 +39,7 @@ import java.util.function.Consumer;
 import rs.igram.kiribi.io.VarInputStream;
 import rs.igram.kiribi.io.VarOutputStream;
 /**
- * 
+ * Endpoint factory for TCP endpoints.
  *
  * @author Michael Sargent
  */
@@ -47,6 +47,15 @@ public abstract class TCPEndpointFactory {
 	
 	private TCPEndpointFactory() {}
 
+	/**
+	 * Returns an endpoint.
+	 *
+	 * @param address The <code>SocketAddress</code> to connect to.
+	 * @return Returns an endpoint.
+	 * @throws IOException if there was a problem opening the endpoint.
+	 * @throws InterruptedException if the provider was interrupted while opening the endpoint.
+	 * @throws ExecutionException if there was a problem opening the endpoint.
+	 */
 	public static Endpoint open(SocketAddress address)
 		throws IOException, InterruptedException, ExecutionException {
 
@@ -55,6 +64,13 @@ public abstract class TCPEndpointFactory {
 		return new ChannelEndpoint(channel).connect(true);
 	}
 
+	/**
+	 * Returns a server endpoint.
+	 *
+	 * @param socketAddress The <code>SocketAddress</code> to listen on.
+	 * @return Returns a server endpoint.
+	 * @throws IOException if there was a problem opening the endpoint.
+	 */
 	public static ServerEndpoint server(SocketAddress socketAddress) 
 		throws IOException {	
 			
