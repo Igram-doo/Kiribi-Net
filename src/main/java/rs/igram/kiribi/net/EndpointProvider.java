@@ -35,17 +35,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-import rs.igram.kiribi.crypto.KeyExchange;
 import rs.igram.kiribi.io.ByteStream;
 import rs.igram.kiribi.io.Decoder;
 import rs.igram.kiribi.io.Encodable;
@@ -130,112 +126,7 @@ public abstract class EndpointProvider<A> {
 	 * Shuts down this endpoint provider.
 	 */
 	public void shutdown() {}
-	
-	static abstract class SecureEndpoint implements Endpoint {
-		// control flags
-		static final byte INIT  = 1; 
-		static final byte DATA  = 2; 
-		static final byte RESET = 3; 
-		static final byte CLOSE = 4; 
-		byte flag = INIT;
-		// handshake timeout in  seconds
-		protected static final long HANDSHAKE_TIMEOUT = 5;
-		protected KeyExchange exchanger;
-		protected int protocolVersion;
-		private CountDownLatch latch = new CountDownLatch(1);
-		boolean isProxy;
-		Address remote;
-		
-		protected synchronized Endpoint connect(boolean isProxy) throws IOException {
-			this.isProxy = isProxy;
-			
-			// magic and version
-			byte[] buf = new byte[10];
-			NetVersion version = NetVersion.current();
 
-			if(isProxy){
-				buf[0] = INIT;
-				buf[1] = (byte)version.protocolVersion;
-				Magic.magic(buf, 2);
-				writeRaw(buf);
-				
-				buf = readRaw();
-				if(buf[0] != INIT){
-					throw new IOException("Attempt to initialize connection with wrong control flag: "+buf[0]);
-				}
-				boolean b = Magic.verifyMagic(buf, 2);
-				if(!b){
-					LOGGER.log(FINE, "Bad Voodoo");
-					throw new IOException("Bad Voodoo");
-				}
-				protocolVersion = buf[1];
-			}else{
-				buf = readRaw();
-				if(buf[0] != INIT){
-					throw new IOException("Attempt to initialize connection with wrong control flag: "+buf[0]);
-				}
-				protocolVersion = Math.min(buf[1], version.protocolVersion);
-				boolean b = Magic.verifyMagic(buf, 2);
-				if(!b){
-					throw new IOException("Bad Voodoo");
-				}
-				buf[1] = (byte)protocolVersion;
-				writeRaw(buf);
-			}
-
-			// key exchange
-			ByteStream stream = new ByteStream() {
-				@Override
-				public void write(byte[] b) throws IOException {
-					byte[] d = new byte[b.length + 1];
-					d[0] = flag;
-					System.arraycopy(b, 0, d, 1, b.length);
-					writeRaw(d);
-				}
-				@Override
-				public byte[] read() throws IOException {
-					byte[] b = readRaw();
-					return extract(b, 1, b.length - 1);
-				}
-			};
-			exchanger = new KeyExchange(isProxy, stream);
-			try{
-				exchanger.exchange();
-			}catch(ArrayIndexOutOfBoundsException e){
-				// ec will throw this if something is wonky
-				throw new IOException(e);
-			}
-			
-			flag = DATA;
-			latch.countDown();
-			
-			return this;
-		}
-				
-		protected abstract void writeRaw(byte[] b) throws IOException;
-		protected abstract byte[] readRaw() throws IOException;
-		
-		@Override
-		public void write(Encodable data) throws IOException {
-			try{
-				latch.await(HANDSHAKE_TIMEOUT, TimeUnit.SECONDS);
-				exchanger.write(data);
-			}catch(Exception e){
-				throw new IOException(e);
-			}
-		}
-
-		@Override
-		public <T> T read(Decoder<T> decoder) throws IOException {
-			try{
-				latch.await(HANDSHAKE_TIMEOUT, TimeUnit.SECONDS);
-				return exchanger.read(decoder);
-			}catch(Exception e){
-				throw new IOException(e);
-			}
-		}
-	}
-	
 	// used by udp provider to multiplex services over a single address
 	class MUX<S extends SecureEndpoint> {
 		static final byte OPEN_SERVICE = 	 10;
@@ -463,38 +354,6 @@ public abstract class EndpointProvider<A> {
 				out.writeLong(id);
 				out.writeBytes(data);
 			}
-		}
-	}
-	
-	// used by tcp endpoint provider
-	static class SocketEndpoint extends SecureEndpoint {
-		private final Socket socket;
-		private VarInputStream in;
-		private VarOutputStream out;
-
-		SocketEndpoint(Socket socket) throws IOException {
-			this.socket = socket;
-			in = new VarInputStream(socket.getInputStream());
-			out = new VarOutputStream(socket.getOutputStream());
-		}
-
-		@Override
-		protected void writeRaw(byte[] b) throws IOException {
-			out.writeBytes(b);
-			out.flush();
-		}
-		
-		@Override
-		protected byte[] readRaw() throws IOException {
-			return in.readBytes();
-		}
-
-		@Override
-		public boolean isOpen() {return !socket.isClosed();}
-
-		@Override
-		public void close() throws IOException {
-			if(!socket.isClosed()) socket.close();
 		}
 	}
 }

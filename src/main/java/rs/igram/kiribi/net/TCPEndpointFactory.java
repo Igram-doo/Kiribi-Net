@@ -79,7 +79,7 @@ public abstract class TCPEndpointFactory {
 		return  new ServerChannelEndpoint(channel);
 	}
 
-	static class ChannelEndpoint extends EndpointProvider.SecureEndpoint {
+	static class ChannelEndpoint extends SecureEndpoint {
 		private AsynchronousSocketChannel channel;
 		private VarInputStream in;
 		private VarOutputStream out;
