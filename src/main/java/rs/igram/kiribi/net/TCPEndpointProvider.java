@@ -38,8 +38,8 @@ final class TCPEndpointProvider extends EndpointProvider<SocketAddress> {
 	
 	private ServerEndpoint server;
 	
-	public TCPEndpointProvider(NetworkExecutor executor, InetSocketAddress socketAddress) {
-		super(executor, socketAddress);
+	public TCPEndpointProvider(InetSocketAddress socketAddress) {
+		super(socketAddress);
 	}
 
 	@Override
