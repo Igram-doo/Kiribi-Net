@@ -27,6 +27,7 @@ package rs.igram.kiribi.net.stack.lookup;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import rs.igram.kiribi.io.EncodableBytes;
@@ -34,7 +35,7 @@ import rs.igram.kiribi.io.VarInputStream;
 import rs.igram.kiribi.io.VarOutputStream;
 import rs.igram.kiribi.net.Address;
 import rs.igram.kiribi.net.Endpoint;
-import rs.igram.kiribi.net.EndpointProvider;
+import rs.igram.kiribi.net.TCPEndpointFactory;
 
 import static rs.igram.kiribi.net.stack.lookup.LookupProtocol.*;
 
@@ -45,20 +46,20 @@ import static rs.igram.kiribi.net.stack.lookup.LookupProtocol.*;
  */
 public final class Lookup {
 	private final Address address;
-	private final SocketAddress lookupServerAddress;
-	private final EndpointProvider<SocketAddress> provider;
+	private final InetSocketAddress socketAddress;
+	private final InetSocketAddress lookupServerAddress;
 	
-	public Lookup(Address address, SocketAddress lookupServerAddress, EndpointProvider<SocketAddress> provider) {
+	public Lookup(Address address, InetSocketAddress socketAddress, InetSocketAddress lookupServerAddress) {
 		this.address = address;
+		this.socketAddress = socketAddress;
 		this.lookupServerAddress = lookupServerAddress;
-		this.provider = provider;
 	}
 	
 	public void register() throws IOException, InterruptedException {
 		VarOutputStream out = new VarOutputStream();
 		out.write(REGISTER);
 		out.write(address);
-		out.writeAddress(provider.socketAddress);
+		out.writeAddress(socketAddress);
 		EncodableBytes bytes = new EncodableBytes(out.toByteArray());
 		Endpoint endpoint = open();
 		endpoint.write(bytes);
@@ -113,6 +114,10 @@ public final class Lookup {
 	}
 		
 	private Endpoint open() throws IOException, InterruptedException {
-		return provider.open(lookupServerAddress);
+		try{
+			return TCPEndpointFactory.open(lookupServerAddress);
+		} catch(ExecutionException e) {
+			throw new IOException(e);
+		}
 	}	
 }

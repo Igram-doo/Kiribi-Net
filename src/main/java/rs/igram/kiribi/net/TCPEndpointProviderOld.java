@@ -29,33 +29,25 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeoutException;
 
-import rs.igram.kiribi.net.stack.lookup.Lookup;
 /**
  * 
  *
  * @author Michael Sargent
  */
-final class TCPEndpointProvider extends EndpointProvider<Address> {
-	final SocketAddress serverAddress;
-	final Address address;
-	final Lookup lookup;
+final class TCPEndpointProviderOld extends EndpointProvider<SocketAddress> {
+	
 	private ServerEndpoint server;
 	
-	public TCPEndpointProvider(InetSocketAddress socketAddress, Address address, InetSocketAddress serverAddress) {
+	public TCPEndpointProviderOld(InetSocketAddress socketAddress) {
 		super(socketAddress);
-		
-		this.address = address;
-		this.serverAddress = serverAddress;
-		
-		lookup = new Lookup(address, socketAddress, serverAddress);
 	}
 
 	@Override
-	public Endpoint open(Address address)
+	public Endpoint open(SocketAddress address)
 		throws IOException, InterruptedException {
 
 		try{
-			return TCPEndpointFactory.open(lookup.lookup(address));
+			return TCPEndpointFactory.open(address);
 		}catch(Exception e){
 			throw new IOException(e);
 		}
@@ -66,7 +58,6 @@ final class TCPEndpointProvider extends EndpointProvider<Address> {
 		throws IOException, InterruptedException, TimeoutException {
 			
 		if (server == null || !server.isOpen())  {		
-			lookup.register();
 			server =  TCPEndpointFactory.server(socketAddress);
 		}
 		

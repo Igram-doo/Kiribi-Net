@@ -75,8 +75,7 @@ public class EndpointProviderTest {
    	    int port2 = 6731;
 		NetworkExecutor executor = new NetworkExecutor();
 		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port2);
-		EndpointProvider<SocketAddress> provider = EndpointProvider.tcpProvider(executor, socketAddress);		
-		Lookup lookup = new Lookup(address, lookupAddress, provider);
+		Lookup lookup = new Lookup(address, socketAddress, lookupAddress);
 		
 		assertNull(lookup.lookup(address));
 		

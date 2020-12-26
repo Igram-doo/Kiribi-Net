@@ -63,8 +63,34 @@ public abstract class EndpointProvider<A> {
 	 * @param nattAddress The socket address of the NATT server the returned endpoint provider will use.
 	 * @return Returns a udp endpoint provider.
 	 */
+	@Deprecated
 	public static EndpointProvider<ConnectionAddress> udpProvider(NetworkExecutor executor, InetSocketAddress socketAddress, Address address, SocketAddress nattAddress) {
 		return new UDPEndpointProvider(executor, socketAddress, address, nattAddress);
+	}
+		
+	/**
+	 * Returns a udp endpoint provider.
+	 *
+	 * @param executor The executor the returned endpoint provider will use.	 
+	 * @param socketAddress The socket address this endpoint provider will use.
+	 * @param address The address the returned endpoint provider will use.
+	 * @param nattAddress The socket address of the NATT server the returned endpoint provider will use.
+	 * @return Returns a udp endpoint provider.
+	 */
+	public static EndpointProvider<ConnectionAddress> udp(NetworkExecutor executor, InetSocketAddress socketAddress, Address address, InetSocketAddress nattAddress) {
+		return new UDPEndpointProvider(executor, socketAddress, address, nattAddress);
+	}
+		
+	/**
+	 * Returns a tcp endpoint provider.
+	 * 
+	 * @param socketAddress The socket address this endpoint provider will use.
+	 * @param address The address the returned endpoint provider will use.
+	 * @param lookupAddress The socket address of the Lookup server the returned endpoint provider will use.
+	 * @return Returns a udp endpoint provider.
+	 */
+	public static EndpointProvider<Address> tcp(InetSocketAddress socketAddress, Address address, InetSocketAddress lookupAddress) {
+		return new TCPEndpointProvider(socketAddress, address, lookupAddress);
 	}
 	
 	/**
@@ -76,7 +102,7 @@ public abstract class EndpointProvider<A> {
 	 */
 	@Deprecated
 	public static EndpointProvider<SocketAddress> tcpProvider(NetworkExecutor executor, InetSocketAddress socketAddress) {
-		return new TCPEndpointProvider(socketAddress);
+		return new TCPEndpointProviderOld(socketAddress);
 	}
 	
 	/**
@@ -85,8 +111,9 @@ public abstract class EndpointProvider<A> {
 	 * @param socketAddress The socket address this endpoint provider will use.
 	 * @return Returns a tcp endpoint provider.
 	 */
+	@Deprecated
 	public static EndpointProvider<SocketAddress> tcpProvider(InetSocketAddress socketAddress) {
-		return new TCPEndpointProvider(socketAddress);
+		return new TCPEndpointProviderOld(socketAddress);
 	}
 
 	/**
