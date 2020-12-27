@@ -98,8 +98,8 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 	final SocketAddress serverAddress;
 	final Address address;
 	final Map<SocketAddress,Address> addresses = new HashMap<>();
-	final Map<SocketAddress,Mux> muxes = new HashMap<>();
-	final Map<Address,Mux> map = new HashMap<>();
+	final Map<SocketAddress,Muxx> muxes = new HashMap<>();
+	final Map<Address,Muxx> map = new HashMap<>();
 	// local connections (from/to ourself)
 	final Map<Long,LocalConnection> localConnections = new HashMap<>();
 	// our address
@@ -213,7 +213,7 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 		}
 		
 		// check if mux already exists for the address
-		Mux mux = null;
+		Muxx mux = null;
 		synchronized(lock){
 			mux = map.get(host);
 		}
@@ -323,7 +323,7 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 		// it doesn't already exit assume its a server
 		
 		synchronized(lock){
-			Mux mux = muxes.get(address);
+			Muxx mux = muxes.get(address);
 			switch(flag){
 			case SecureEndpoint.INIT:
 				if(mux == null){
@@ -357,9 +357,9 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 		}
 	}
 
-	private Mux openMux(SocketAddress sa, boolean isProxy) {
+	private Muxx openMux(SocketAddress sa, boolean isProxy) {
 		MUXEndpoint ep = new MUXEndpoint(sa);
-		Mux mux = new Mux(ep);
+		Muxx mux = new Muxx(ep);
 		muxes.put(sa, mux);
 		executor.submit(() -> {
 			try{
@@ -373,7 +373,7 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 		return mux;
 	}
 	
-	private void resetMux(Mux mux, SocketAddress sa, boolean isProxy) {
+	private void resetMux(Muxx mux, SocketAddress sa, boolean isProxy) {
 		MUXEndpoint ep = new MUXEndpoint(sa);
 		executor.submit(() -> {
 			try{
@@ -399,14 +399,14 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 		public void close() throws IOException {}
 	}
 	
-	private final class Mux extends MUX<MUXEndpoint> {
+	private final class Muxx extends MUX<MUXEndpoint> {
 		Address address;
 		
-		Mux(SocketAddress sa) {
+		Muxx(SocketAddress sa) {
 			this(new MUXEndpoint(sa));
 		}
 		
-		Mux(MUXEndpoint root) {
+		Muxx(MUXEndpoint root) {
 			super(root, consumer);			
 		}
 		
