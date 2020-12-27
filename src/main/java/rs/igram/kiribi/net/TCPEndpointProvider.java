@@ -35,7 +35,7 @@ import rs.igram.kiribi.net.stack.lookup.Lookup;
  *
  * @author Michael Sargent
  */
-final class TCPEndpointProvider extends EndpointProvider<Address> {
+final class TCPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 	final SocketAddress serverAddress;
 	final Address address;
 	final Lookup lookup;
@@ -51,11 +51,11 @@ final class TCPEndpointProvider extends EndpointProvider<Address> {
 	}
 
 	@Override
-	public Endpoint open(Address address)
+	public Endpoint open(ConnectionAddress address)
 		throws IOException, InterruptedException {
 
 		try{
-			return TCPEndpointFactory.open(lookup.lookup(address));
+			return TCPEndpointFactory.open(lookup.lookup(address.address));
 		}catch(Exception e){
 			throw new IOException(e);
 		}

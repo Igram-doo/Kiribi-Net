@@ -42,11 +42,8 @@ import java.util.concurrent.TimeoutException;
  * @author Michael Sargent
  */
 public abstract class EndpointProvider<A> {
-	
 	final Map<Address,SocketAddress> cache = new HashMap<>();
 	
-	/** The executor associated with this endpoint provider. */
-	//final NetworkExecutor executor;
 	/** The socket address associated with this endpoint provider. */
 	public final InetSocketAddress socketAddress;
 	
@@ -89,7 +86,7 @@ public abstract class EndpointProvider<A> {
 	 * @param lookupAddress The socket address of the Lookup server the returned endpoint provider will use.
 	 * @return Returns a udp endpoint provider.
 	 */
-	public static EndpointProvider<Address> tcp(InetSocketAddress socketAddress, Address address, InetSocketAddress lookupAddress) {
+	public static EndpointProvider<ConnectionAddress> tcp(InetSocketAddress socketAddress, Address address, InetSocketAddress lookupAddress) {
 		return new TCPEndpointProvider(socketAddress, address, lookupAddress);
 	}
 	

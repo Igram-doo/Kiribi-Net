@@ -559,8 +559,7 @@ final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
 			}
 		}
 	}
-	
-	
+		
 	// used by udp provider to multiplex services over a single address
 	class MUX<S extends SecureEndpoint> {
 		static final byte OPEN_SERVICE = 	 10;
