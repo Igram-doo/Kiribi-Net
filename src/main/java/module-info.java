@@ -36,4 +36,5 @@ module rs.igram.kiribi.net {
 	requires rs.igram.kiribi.crypto;
 	exports rs.igram.kiribi.net;
 	exports rs.igram.kiribi.net.natt;
+	exports rs.igram.kiribi.net.lookup;
 }

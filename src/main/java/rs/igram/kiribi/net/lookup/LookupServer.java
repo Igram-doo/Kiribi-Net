@@ -48,6 +48,9 @@ import static rs.igram.kiribi.net.stack.lookup.LookupProtocol.*;
  * @author Michael Sargent
  */
 public final class LookupServer {
+	/** Default server port. */
+	public static final int SERVER_PORT = 7732;
+	
 	private final Map<Address, InetSocketAddress> cache = Collections.synchronizedMap(new HashMap<Address, InetSocketAddress>());
 	
 	private  boolean started = false;

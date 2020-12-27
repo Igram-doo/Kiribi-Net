@@ -78,7 +78,7 @@ import static java.util.logging.Level.*;
  *
  * @author Michael Sargent
  */
-final class UDPEndpointProvider extends EndpointProvider<ConnectionAddress> {
+final class UDPEndpointProvider extends EndpointProvider {
 	private static final Logger LOGGER = Logger.getLogger(UDPEndpointProvider.class.getName());
 	
 	// todo: adjust timeout based on message size?

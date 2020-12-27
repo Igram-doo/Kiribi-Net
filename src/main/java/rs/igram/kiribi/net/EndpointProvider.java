@@ -41,7 +41,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author Michael Sargent
  */
-public abstract class EndpointProvider<A> {
+public abstract class EndpointProvider {
 	final Map<Address,SocketAddress> cache = new HashMap<>();
 	
 	/** The socket address associated with this endpoint provider. */
@@ -60,21 +60,7 @@ public abstract class EndpointProvider<A> {
 	 * @param nattAddress The socket address of the NATT server the returned endpoint provider will use.
 	 * @return Returns a udp endpoint provider.
 	 */
-	@Deprecated
-	public static EndpointProvider<ConnectionAddress> udpProvider(NetworkExecutor executor, InetSocketAddress socketAddress, Address address, SocketAddress nattAddress) {
-		return new UDPEndpointProvider(executor, socketAddress, address, nattAddress);
-	}
-		
-	/**
-	 * Returns a udp endpoint provider.
-	 *
-	 * @param executor The executor the returned endpoint provider will use.	 
-	 * @param socketAddress The socket address this endpoint provider will use.
-	 * @param address The address the returned endpoint provider will use.
-	 * @param nattAddress The socket address of the NATT server the returned endpoint provider will use.
-	 * @return Returns a udp endpoint provider.
-	 */
-	public static EndpointProvider<ConnectionAddress> udp(NetworkExecutor executor, InetSocketAddress socketAddress, Address address, InetSocketAddress nattAddress) {
+	public static EndpointProvider udp(NetworkExecutor executor, InetSocketAddress socketAddress, Address address, InetSocketAddress nattAddress) {
 		return new UDPEndpointProvider(executor, socketAddress, address, nattAddress);
 	}
 		
@@ -86,31 +72,8 @@ public abstract class EndpointProvider<A> {
 	 * @param lookupAddress The socket address of the Lookup server the returned endpoint provider will use.
 	 * @return Returns a udp endpoint provider.
 	 */
-	public static EndpointProvider<ConnectionAddress> tcp(InetSocketAddress socketAddress, Address address, InetSocketAddress lookupAddress) {
+	public static EndpointProvider tcp(InetSocketAddress socketAddress, Address address, InetSocketAddress lookupAddress) {
 		return new TCPEndpointProvider(socketAddress, address, lookupAddress);
-	}
-	
-	/**
-	 * Returns a tcp endpoint provider.
-	 *
-	 * @param executor The executor the returned endpoint provider will use.
-	 * @param socketAddress The socket address this endpoint provider will use.
-	 * @return Returns a tcp endpoint provider.
-	 */
-	@Deprecated
-	public static EndpointProvider<SocketAddress> tcpProvider(NetworkExecutor executor, InetSocketAddress socketAddress) {
-		return new TCPEndpointProviderOld(socketAddress);
-	}
-	
-	/**
-	 * Returns a tcp endpoint provider.
-	 *
-	 * @param socketAddress The socket address this endpoint provider will use.
-	 * @return Returns a tcp endpoint provider.
-	 */
-	@Deprecated
-	public static EndpointProvider<SocketAddress> tcpProvider(InetSocketAddress socketAddress) {
-		return new TCPEndpointProviderOld(socketAddress);
 	}
 
 	/**
@@ -134,7 +97,7 @@ public abstract class EndpointProvider<A> {
 	 * @throws IOException if there was a problem opening the endpoint.
 	 * @throws InterruptedException if the provider was interrupted while opening the endpoint.
 	 */
-	public abstract Endpoint open(A address) 
+	public abstract Endpoint open(ConnectionAddress address) 
 		throws IOException, InterruptedException;
 		
 	/**

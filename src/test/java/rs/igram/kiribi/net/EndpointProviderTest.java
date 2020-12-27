@@ -90,10 +90,18 @@ public class EndpointProviderTest {
 	public void testTCP() throws IOException, InterruptedException, Exception {
 		int port = 6732;
 		NetworkExecutor executor = new NetworkExecutor();
-		SocketAddress address = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port);
+		PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
+		Address address = new Address(key);
+		InetSocketAddress serverAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), LookupServer.SERVER_PORT);
 		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port);
-		EndpointProvider<SocketAddress> provider = EndpointProvider.tcpProvider(executor, socketAddress);
-		ProviderTest test = new ProviderTest<SocketAddress>(executor, provider, address);
+		EndpointProvider provider = EndpointProvider.tcp(socketAddress, address, serverAddress);
+		ConnectionAddress connectionAddress = new ConnectionAddress(address, 1l);
+		
+		LookupServer server = new LookupServer();
+   	   	server.start(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), LookupServer.SERVER_PORT));
+   	   	
+   	   	
+		ProviderTest test = new ProviderTest(executor, provider, connectionAddress);
 		test.run(6732);
    	   
 		assertTrue(test.openSuccess);
@@ -107,15 +115,15 @@ public class EndpointProviderTest {
 		NetworkExecutor executor = new NetworkExecutor();
 		PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
 		Address address = new Address(key);
-		SocketAddress serverAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), NATTServer.SERVER_PORT);
+		InetSocketAddress serverAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), NATTServer.SERVER_PORT);
 		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port);
-		EndpointProvider<ConnectionAddress> provider = EndpointProvider.udpProvider(executor, socketAddress, address, serverAddress);		
+		EndpointProvider provider = EndpointProvider.udp(executor, socketAddress, address, serverAddress);		
 		ConnectionAddress connectionAddress = new ConnectionAddress(address, 1l);
 		
 		NATTServer server = new NATTServer();
    	   	server.start(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), NATTServer.SERVER_PORT));
    	   	
-		ProviderTest test = new ProviderTest<ConnectionAddress>(executor, provider, connectionAddress);
+		ProviderTest test = new ProviderTest(executor, provider, connectionAddress);
 		test.run(port);
    	   
 		assertTrue(test.openSuccess);
@@ -125,7 +133,7 @@ public class EndpointProviderTest {
 		server.shutdown();
 	}
    
-	private static class ProviderTest<A> {
+	private static class ProviderTest {
    	   boolean openSuccess = false;
    	   boolean readSuccess = false;
    	   boolean writeSuccess = false;
@@ -137,20 +145,17 @@ public class EndpointProviderTest {
    	   CountDownLatch openSignal = new CountDownLatch(1);
    	   
    	   NetworkExecutor executor;
-   	   EndpointProvider<A> provider;
-   	   A address;
+   	   EndpointProvider provider;
+   	   ConnectionAddress address;
    	   
-   	   ProviderTest( NetworkExecutor executor, EndpointProvider<A> provider, A address) {
+   	   ProviderTest( NetworkExecutor executor, EndpointProvider provider, ConnectionAddress address) {
    	   	   this.executor = executor;
    	   	   this.provider = provider;
    	   	   this.address = address;
    	   }
    	   
    	   void run(int port) throws IOException, InterruptedException, Exception {
-   	   	//   NetworkMonitor.monitor(executor);
-   	   	//   NetworkMonitor.onAvailable(() -> {
-   	   		   availableSignal.countDown();
-   	   	//   });
+   	   	   availableSignal.countDown();
    	   	   availableSignal.await(3, TimeUnit.SECONDS);
    	   	   ServerEndpoint se = provider.server();
    	   	   se.accept(this::accept);
@@ -161,8 +166,7 @@ public class EndpointProviderTest {
    	   	   writeSuccess = msg2.equals(msg);
    	   	   
    	   	   openSignal.await(3, TimeUnit.SECONDS);
-   	   	   
-   	   	   //executor.shutdown();  	   	   
+   	   	    	   	   
    	   }
    	   
    	   void accept(Endpoint e) {

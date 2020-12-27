@@ -35,7 +35,7 @@ import rs.igram.kiribi.net.stack.lookup.Lookup;
  *
  * @author Michael Sargent
  */
-final class TCPEndpointProvider extends EndpointProvider<ConnectionAddress> {
+final class TCPEndpointProvider extends EndpointProvider {
 	final SocketAddress serverAddress;
 	final Address address;
 	final Lookup lookup;
