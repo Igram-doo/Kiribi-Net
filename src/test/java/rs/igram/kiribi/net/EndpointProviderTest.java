@@ -52,6 +52,7 @@ import rs.igram.kiribi.crypto.KeyPairGenerator;
 import rs.igram.kiribi.io.*;
 import rs.igram.kiribi.net.natt.NATTServer;
 import rs.igram.kiribi.net.lookup.LookupServer;
+import rs.igram.kiribi.net.stack.discovery.*;
 import rs.igram.kiribi.net.stack.lookup.*;
 
 /**
@@ -60,6 +61,46 @@ import rs.igram.kiribi.net.stack.lookup.*;
  * @author Michael Sargent
  */
 public class EndpointProviderTest {
+	
+	@Test
+	public void testDiscovery() throws IOException, InterruptedException, Exception {
+		// discovery1
+		PublicKey key1 = KeyPairGenerator.generateKeyPair().getPublic();
+		Address address1 = new Address(key1);
+		InetSocketAddress socketAddress1 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 6888);
+		NetworkExecutor executor1 = new NetworkExecutor();		
+		InetSocketAddress group1 = new InetSocketAddress(InetAddress.getByName("233.0.0.0"), 4769);
+		Discovery discovery1 = new Discovery(executor1, address1, socketAddress1, group1);		
+   	    discovery1.start();
+   	    
+   	    Thread.sleep(500);
+   	    
+   	    // discovery2
+   	    PublicKey key2 = KeyPairGenerator.generateKeyPair().getPublic();
+		Address address2 = new Address(key2);
+		InetSocketAddress socketAddress2 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 6889);
+		NetworkExecutor executor2 = new NetworkExecutor();	
+		InetSocketAddress group2 = new InetSocketAddress(InetAddress.getByName("233.0.0.0"), 4769);
+		Discovery discovery2 = new Discovery(executor2, address2, socketAddress2, group2);		
+   	    discovery2.start();
+   	    
+   	    Thread.sleep(500);
+		
+   	    InetSocketAddress result = null;
+   	    
+   	    result = discovery1.address(address1);
+		assertEquals(socketAddress1, result);		
+		result = discovery1.address(address2);
+		assertEquals(socketAddress2, result);
+		
+		result = discovery2.address(address1);
+		assertEquals(socketAddress1, result);
+		result = discovery2.address(address2);
+		assertEquals(socketAddress2, result);
+		
+		discovery1.shutdown();
+		discovery2.shutdown();
+	}
 	
 	@Test
 	public void testLookup() throws IOException, InterruptedException, Exception {
@@ -131,6 +172,25 @@ public class EndpointProviderTest {
 		assertTrue(test.writeSuccess);
 		
 		server.shutdown();
+	}
+	
+	@Test
+	public void testLAN() throws IOException, InterruptedException, Exception {
+		int port = 6733;
+		NetworkExecutor executor = new NetworkExecutor();
+		PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
+		Address address = new Address(key);
+		InetSocketAddress group = EndpointProvider.defaultGroup();
+		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port);
+		EndpointProvider provider = EndpointProvider.lan(executor, socketAddress, address, group);		
+		ConnectionAddress connectionAddress = new ConnectionAddress(address, 1l);
+		
+		ProviderTest test = new ProviderTest(executor, provider, connectionAddress);
+		test.run(port);
+   	   
+		assertTrue(test.openSuccess);
+		assertTrue(test.readSuccess);
+		assertTrue(test.writeSuccess);
 	}
    
 	private static class ProviderTest {

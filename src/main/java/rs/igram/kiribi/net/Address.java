@@ -122,6 +122,15 @@ public final class Address implements Encodable {
 		this(Base64.getUrlDecoder().decode(s));
 	}
 
+	/**
+	 * Returns the byte array associated with this address.
+	 *
+	 * @return The byte array associated with this address.
+	 */
+	public byte[] bytes() {
+		return ByteUtils.copy(bytes);
+	}
+	
 	@Override
 	public void write(VarOutput out) throws IOException {
 		out.write(bytes);

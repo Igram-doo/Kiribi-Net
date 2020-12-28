@@ -26,11 +26,13 @@ package rs.igram.kiribi.net;
 
 import java.io.InterruptedIOException;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NoRouteToHostException;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,11 +46,15 @@ import java.util.concurrent.TimeoutException;
 public abstract class EndpointProvider {
 	final Map<Address,SocketAddress> cache = new HashMap<>();
 	
+	/** The address associated with this endpoint provider. */
+	public final Address address;
+	
 	/** The socket address associated with this endpoint provider. */
 	public final InetSocketAddress socketAddress;
 	
-	EndpointProvider(InetSocketAddress socketAddress) {
+	EndpointProvider(InetSocketAddress socketAddress, Address address) {
 		this.socketAddress = socketAddress;
+		this.address = address;
 	}
 		
 	/**
@@ -75,7 +81,31 @@ public abstract class EndpointProvider {
 	public static EndpointProvider tcp(InetSocketAddress socketAddress, Address address, InetSocketAddress lookupAddress) {
 		return new TCPEndpointProvider(socketAddress, address, lookupAddress);
 	}
+		
+	/**
+	 * Returns a lan endpoint provider.
+	 *
+	 * @param executor The executor the returned endpoint provider will use.	 
+	 * @param socketAddress The socket address this endpoint provider will use.
+	 * @param address The address the returned endpoint provider will use.
+	 * @param groupAddress The socket address of the multicast group the returned endpoint provider will use.
+	 * @return Returns a udp endpoint provider.
+	 */
+	public static EndpointProvider lan(NetworkExecutor executor, InetSocketAddress socketAddress, Address address, InetSocketAddress groupAddress) {
+		return new LANEndpointProvider(executor, socketAddress, address, groupAddress);
+	}
 
+	/**
+	 * Returns the default multicast group address.
+	 *
+	 * @return Returns the default multicast group address.
+	 * @throws UnknownHostException if there was a problem getting the default multicast group address.
+	 */
+	public static InetSocketAddress defaultGroup() throws UnknownHostException {
+		return new InetSocketAddress(InetAddress.getByName("233.0.0.0"), 4767);
+	}
+		
+	
 	/**
 	 * Returns a server endpoint.
 	 *

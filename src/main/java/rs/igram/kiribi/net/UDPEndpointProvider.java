@@ -96,7 +96,6 @@ final class UDPEndpointProvider extends EndpointProvider {
 	
 	final Object lock = new Object(){};
 	final SocketAddress serverAddress;
-	final Address address;
 	final Map<SocketAddress,Address> addresses = new HashMap<>();
 	final Map<SocketAddress,Muxx> muxes = new HashMap<>();
 	final Map<Address,Muxx> map = new HashMap<>();
@@ -117,10 +116,9 @@ final class UDPEndpointProvider extends EndpointProvider {
 	private InetSocketAddress socketAddress;
 	
 	public UDPEndpointProvider(NetworkExecutor executor, InetSocketAddress socketAddress, Address address, SocketAddress serverAddress) {
-		super(socketAddress);
+		super(socketAddress, address);
 		
 		this.executor = executor;
-		this.address = address;
 		this.serverAddress = serverAddress;
 		
 		me = address;

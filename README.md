@@ -25,10 +25,11 @@ Each UDP peer maintains a unique Address. Addresses can be instatiated with a cr
 * ServerEndpoint: Provides similar functionality to the standard Java ServerSocket.
 
 ##### Endpoint Providers
-Factories for creating endpoints. Currently the following two EndpointProviders are implemented:
+Factories for creating endpoints. Currently the following three EndpointProviders are implemented:
 
 * TCPEndpointProvider: creates TCP Endpoints
 * UDPEndpointProvider: creates UDP Endpoints
+* LANEndpointProvider: creates TCP Endpoints with LAN multicast discovery
 
 ##### Network Executor
 Wrapper for a Java ForkJoinPool and ScheduledExecutorService to facilitate multi-threading.
@@ -96,4 +97,3 @@ Provides static methods to monitor network availability.
 * Add blurb about NAT transversal and router types.
 * Add link to check if router supports NAT transversal.
 * Add blurb about router configuration.
-* Add multicast discovery for use on a LAN.

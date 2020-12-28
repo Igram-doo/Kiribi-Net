@@ -29,29 +29,32 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeoutException;
 
-import rs.igram.kiribi.net.stack.lookup.Lookup;
+import rs.igram.kiribi.net.stack.discovery.Discovery;
 /**
  * 
  *
  * @author Michael Sargent
  */
-final class TCPEndpointProvider extends EndpointProvider {
-	final Lookup lookup;
+final class LANEndpointProvider extends EndpointProvider {
+	final Discovery discovery;
 	private ServerEndpoint server;
 	
-	public TCPEndpointProvider(InetSocketAddress socketAddress, Address address, InetSocketAddress serverAddress) {
+	public LANEndpointProvider(NetworkExecutor executor, InetSocketAddress socketAddress, Address address, InetSocketAddress group) {
 		super(socketAddress, address);
 		
-		lookup = new Lookup(address, socketAddress, serverAddress);
+		discovery = new Discovery(executor, address, socketAddress, group);		
 	}
 
 	@Override
 	public Endpoint open(ConnectionAddress address)
 		throws IOException, InterruptedException {
 
+		discovery.start();
+		InetSocketAddress remoteAddress = discovery.address(address.address);
 		try{
-			return TCPEndpointFactory.open(lookup.lookup(address.address));
+			return TCPEndpointFactory.open(remoteAddress);
 		}catch(Exception e){
+			discovery.remove(address.address);
 			throw new IOException(e);
 		}
 	}
@@ -60,8 +63,8 @@ final class TCPEndpointProvider extends EndpointProvider {
 	public ServerEndpoint server() 
 		throws IOException, InterruptedException, TimeoutException {
 			
-		if (server == null || !server.isOpen())  {		
-			lookup.register();
+		if (server == null || !server.isOpen())  {	
+			discovery.start();
 			server =  TCPEndpointFactory.server(socketAddress);
 		}
 		
