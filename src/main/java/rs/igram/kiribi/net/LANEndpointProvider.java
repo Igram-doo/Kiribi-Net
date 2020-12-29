@@ -51,6 +51,7 @@ final class LANEndpointProvider extends EndpointProvider {
 
 		discovery.start();
 		InetSocketAddress remoteAddress = discovery.address(address.address);
+		if (remoteAddress == null) return null;
 		try{
 			return TCPEndpointFactory.open(remoteAddress);
 		}catch(Exception e){

@@ -52,7 +52,7 @@ import static java.util.logging.Level.*;
  */
 public final class Discovery {
 	private static final Logger LOGGER = Logger.getLogger(Discovery.class.getName());
-	static int cnt = 0;
+	
 	private final Map<Address, InetSocketAddress> map = new HashMap<>();
 	private final InetSocketAddress group;
 	private final ByteBuffer out;
@@ -63,6 +63,7 @@ public final class Discovery {
     private boolean started = false;
 	private Future<?> reader;
 	private Future<?> broadcaster;
+	private MembershipKey key;
 	
 	private final Object stateLock = new Object(){};
 	
@@ -70,7 +71,7 @@ public final class Discovery {
 	public Discovery(NetworkExecutor executor, Address address, InetSocketAddress socketAddress, InetSocketAddress group) {
 		this.executor = executor;
 		this.group = group;
-		cnt++;
+		
 		byte[] buf = new byte[40];
 		byte[] encoded = address.bytes();
 		System.arraycopy(encoded, 0, buf, 0, 20);
@@ -89,7 +90,7 @@ public final class Discovery {
 					.setOption(StandardSocketOptions.SO_REUSEADDR, true)
 					.bind(new InetSocketAddress(group.getPort()))
 					.setOption(StandardSocketOptions.IP_MULTICAST_IF, ifc);
-				channel.join(group.getAddress(), ifc);
+				key = channel.join(group.getAddress(), ifc);
 				
 				reader = executor.submit(this::read);
 				broadcast();
@@ -110,7 +111,7 @@ public final class Discovery {
 			remote = map.get(address);
 		}
 		
-		LOGGER.log(FINE, "ADDRESS: {0} {1} {2}", new Object[]{address, remote, cnt});
+		LOGGER.log(FINE, "ADDRESS: {0} {1}", new Object[]{address, remote});
 		return remote;
 	}
 	
@@ -130,29 +131,34 @@ public final class Discovery {
 	
 	private void read() {
 		while(!Thread.currentThread().isInterrupted() && channel.isOpen()) {
-			try {
-				channel.receive(in);
-				byte[] buf = in.array();
-				Address address = new Address(ByteUtils.crop(buf, 20));
-				InetSocketAddress socketAddress = (InetSocketAddress)ByteUtils.inet(buf, 20);
-				in.flip();
+			if (key.isValid()) {
+				try {
+					in.clear();
+					InetSocketAddress remoteAddress = (InetSocketAddress) channel.receive(in);
+					in.flip();
+
+					byte[] buf = in.array();
+					Address address = new Address(ByteUtils.crop(buf, 20));
+					InetSocketAddress socketAddress = (InetSocketAddress)ByteUtils.inet(buf, 20);
+					
+					executor.submit(() -> {
+						boolean exists = false;
+						synchronized(map) {
+							exists = map.containsKey(address);
+							map.put(address, socketAddress);
+						}
 				
-				boolean exists = false;
-				synchronized(map) {
-					exists = map.containsKey(address);
-					map.put(address, socketAddress);
+						if (!exists) {
+							LOGGER.log(FINE, "RECEIVE: {0} {1} {2}", new Object[]{remoteAddress, address, socketAddress});
+							broadcast();
+						}
+					});
+				} catch(AsynchronousCloseException e) {
+					// ignore
+				} catch(IOException e) {
+					// log and ignore
+					LOGGER.log(FINE, e.toString(), e);
 				}
-				
-				if (!exists) {
-					LOGGER.log(FINE, "RECEIVE: {0} {1} {2}", new Object[]{address, socketAddress, cnt});
-					broadcast();
-				}
-				
-			} catch(AsynchronousCloseException e) {
-				// ignore
-			} catch(IOException e) {
-				// log and ignore
-				LOGGER.log(FINE, e.toString(), e);
 			}
 		}
 	}
