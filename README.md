@@ -91,8 +91,8 @@ Provides static methods to monitor network availability.
 ##### Exports
 * rs.igram.kiribi.net
 
+Java version 11
 ### To Do
-* Determine minimum supported Java version.
 * Finish unit tests.
 * Add blurb about NAT transversal and router types.
 * Add link to check if router supports NAT transversal.
