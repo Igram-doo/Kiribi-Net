@@ -148,10 +148,10 @@ final class UDPEndpointProvider extends EndpointProvider {
 	}
 
 	private void monitorActivity() {
-		while(!Thread.currentThread().isInterrupted()){
-			try{
+		while(!Thread.currentThread().isInterrupted()) {
+			try {
 				TimeUnit.SECONDS.sleep(sweepInterval);
-			}catch(InterruptedException e){
+			} catch(InterruptedException e) {
 				return;
 			}
 			synchronized(lock){
@@ -196,14 +196,14 @@ final class UDPEndpointProvider extends EndpointProvider {
 		// check here to avoid deadlock - see ServiceAdmin.initialize()
 		
 		// check if we are connecting to ourself
-		if(me.equals(host)){
+		if(me.equals(host)) {
 			return localConnections.computeIfAbsent(id, k -> {
-				try{
+				try {
 					LocalConnection local = new LocalConnection();
 					// connect service
 					executor.submit(() -> consumer.accept(local.service));
 					return local;
-				}catch(IOException e){
+				} catch(IOException e) {
 					// shouldn't happen
 					throw new UncheckedIOException(e);
 				}
@@ -212,16 +212,16 @@ final class UDPEndpointProvider extends EndpointProvider {
 		
 		// check if mux already exists for the address
 		Muxx mux = null;
-		synchronized(lock){
+		synchronized(lock) {
 			mux = map.get(host);
 		}
-		if(mux != null){
+		if(mux != null) {
 			// ugh!
 			if(mux.isClosed() || (mux.root != null && !mux.root.isOpen())){
 				synchronized(lock){
 					map.remove(host);
 				}
-			}else{
+			} else {
 				return mux.open(id);
 			}
 		}
@@ -235,11 +235,11 @@ final class UDPEndpointProvider extends EndpointProvider {
 			if(inet == null) throw new IOException("CONNECT failed");
 			
 			// mux
-			synchronized(lock){
+			synchronized(lock) {
 				mux = muxes.get(inet);
-				if(mux == null){
+				if(mux == null) {
 					mux = openMux(inet, true);
-				}else if(mux.isClosed()){
+				} else if(mux.isClosed()) {
 					muxes.remove(inet);
 					mux = openMux(inet, true);
 				}
@@ -253,19 +253,19 @@ final class UDPEndpointProvider extends EndpointProvider {
 // TODO ADD CACHE LOOP END			
 		//}
 		
-		}catch(AddressNotRegisteredException e){
+		} catch(AddressNotRegisteredException e) {
 			synchronized(lock){
 				map.remove(host);
 			}
 			throw new NoRouteToHostException("Address not registered");
-		}catch(Exception e){
-			synchronized(lock){
+		} catch(Exception e) {
+			synchronized(lock) {
 				map.remove(host);
 			}
 			throw new IOException(e);
 		}		
 		
-		synchronized(lock){
+		synchronized(lock) {
 			map.put(host, mux);
 			addresses.put(inet, host);
 		}
@@ -277,7 +277,7 @@ final class UDPEndpointProvider extends EndpointProvider {
 
 	@Override
 	public synchronized ServerEndpoint server()
-		throws IOException, InterruptedException, TimeoutException{
+		throws IOException, InterruptedException, TimeoutException {
 		
 		start();
 		return server;
@@ -291,9 +291,9 @@ final class UDPEndpointProvider extends EndpointProvider {
 			});
 			muxes.clear();
 			// give some time to notify remote peers
-			try{
+			try {
 				TimeUnit.MILLISECONDS.sleep(300);
-			}catch(Exception z){}
+			} catch(Exception z) {}
 			
 			if(activityMonitor != null) activityMonitor.cancel(true);
 			if(stack != null) stack.shutdown();
@@ -305,10 +305,10 @@ final class UDPEndpointProvider extends EndpointProvider {
 	}
 
 	void process(SessionEvent e) {		
-		if(nattSocket != null && e.type == SOCKET){ 
-			try{
+		if(nattSocket != null && e.type == SOCKET) { 
+			try {
 				stack.process(e.data);
-			}catch(Exception x){
+			} catch(Exception x) {
 				// ignore ?
 			}
 		}
@@ -320,27 +320,27 @@ final class UDPEndpointProvider extends EndpointProvider {
 		// if already opened as proxy, 2nd arg to mux ignored so if 
 		// it doesn't already exit assume its a server
 		
-		synchronized(lock){
+		synchronized(lock) {
 			Muxx mux = muxes.get(address);
 			switch(flag){
 			case SecureEndpoint.INIT:
-				if(mux == null){
+				if(mux == null) {
 					// open
 					mux = openMux(address, false);
-				}else{
+				} else {
 					// reset local peer
 					if(mux.root.flag != SecureEndpoint.INIT) resetMux(mux, address, false);
 				}
 				mux.root().receive(data);
 				break;
 			case SecureEndpoint.DATA:
-				if(mux == null){
+				if(mux == null) {
 					// reset remote peer
 					byte[] b = new byte[]{SecureEndpoint.RESET};
-					try{
+					try {
 						stack.send(address, b);
-					}catch(InterruptedException x){}
-				}else{
+					} catch(InterruptedException x) {}
+				} else {
 					// process
 					mux.root().receive(data);
 				}
@@ -360,9 +360,9 @@ final class UDPEndpointProvider extends EndpointProvider {
 		Muxx mux = new Muxx(ep);
 		muxes.put(sa, mux);
 		executor.submit(() -> {
-			try{
+			try {
 				ep.connect(isProxy);
-			}catch(Throwable e){
+			} catch(Throwable e) {
 				muxes.remove(sa);
 				// todo ?
 			}
@@ -374,9 +374,9 @@ final class UDPEndpointProvider extends EndpointProvider {
 	private void resetMux(Muxx mux, SocketAddress sa, boolean isProxy) {
 		MUXEndpoint ep = new MUXEndpoint(sa);
 		executor.submit(() -> {
-			try{
+			try {
 				ep.connect(isProxy);
-			}catch(Exception e){
+			} catch(Exception e) {
 				muxes.remove(sa);
 				// todo ?
 			}
@@ -414,7 +414,7 @@ final class UDPEndpointProvider extends EndpointProvider {
 		
 		@Override
 		protected void onDisposed(MUX mux) {
-			synchronized(lock){
+			synchronized(lock) {
 				map.remove(address);
 				muxes.remove(root.address);
 			}
@@ -435,20 +435,20 @@ final class UDPEndpointProvider extends EndpointProvider {
 		protected Endpoint connect(boolean isProxy) throws IOException {
 			CompletableFuture<Endpoint> f = new CompletableFuture<>();
 			executor.submit(() -> {
-				try{
+				try {
 					Endpoint ep = super.connect(isProxy);
 					f.complete(ep);
-				}catch(IOException e){
+				} catch(IOException e) {
 					f.completeExceptionally(e);
 				}
 			});
 			
-			try{
+			try {
 				return f.get(HANDSHAKE_TIMEOUT, TimeUnit.SECONDS);
-			}catch(InterruptedException e){
+			} catch(InterruptedException e) {
 				// ignore
 				return null;
-			}catch(Exception e){
+			} catch(Exception e) {
 				throw new IOException(e);
 			}
 		}
@@ -456,19 +456,19 @@ final class UDPEndpointProvider extends EndpointProvider {
 		@Override
 		protected void writeRaw(byte[] b) throws IOException {
 			if(isClosed) throw new IOException("SecureEndpoint is closed");
-			try{
+			try {
 				boolean success = stack.send(address, b).get(sendTimeout, TimeUnit.MILLISECONDS);
-				if(!success){
+				if(!success) {
 					throw new IOException("Send failed...");
-				}else{
+				} else {
 					// mark activity
 					if(b[0] == SecureEndpoint.DATA) mark = System.currentTimeMillis();
 				}
-			}catch(InterruptedException e){
+			} catch(InterruptedException e) {
 				// ignore
-			}catch(TimeoutException e){
+			} catch(TimeoutException e) {
 				throw new IOException(e);
-			}catch(ExecutionException e){
+			} catch(ExecutionException e) {
 				throw new IOException(e.getCause());
 			}
 		}
@@ -476,9 +476,9 @@ final class UDPEndpointProvider extends EndpointProvider {
 		@Override
 		protected byte[] readRaw() throws IOException {
 			if(isClosed) throw new IOException("SecureEndpoint is closed");
-			try{
+			try {
 				return queue.take();
-			}catch(InterruptedException e){
+			} catch(InterruptedException e) {
 				throw new IOException(e);
 			}
 		}
@@ -499,7 +499,7 @@ final class UDPEndpointProvider extends EndpointProvider {
 		public void close() {
 			isClosed = true;
 			queue.clear();
-			synchronized(lock){
+			synchronized(lock) {
 				muxes.remove(address);
 				Address addr = addresses.remove(address);
 				map.remove(addr);
@@ -533,7 +533,7 @@ final class UDPEndpointProvider extends EndpointProvider {
 			private VarInputStream in;
 			private VarOutputStream out;
 
-			LocalEndpoint(InputStream i, OutputStream o){
+			LocalEndpoint(InputStream i, OutputStream o) {
 				in = new VarInputStream(i);
 				out = new VarOutputStream(o);
 			}
@@ -579,13 +579,13 @@ final class UDPEndpointProvider extends EndpointProvider {
 			future = executor.submit(this::read);
 		}
 
-		void reset(S value){
+		void reset(S value) {
 			future.cancel(true);
 			delegates.values().forEach(ServiceEndpoint::setClosed);
 			delegates.clear();
-			try{
+			try {
 				root.close();
-			}catch(Exception e){
+			} catch(Exception e) {
 				// ignore
 			}
 			isClosed = false;
@@ -606,7 +606,7 @@ final class UDPEndpointProvider extends EndpointProvider {
 		protected void process(long id, byte[] b) {
 			if(isClosed) return;
 			ServiceEndpoint delegate = delegates.get(id);
-			if(delegate == null){
+			if(delegate == null) {
 				delegate = new ServiceEndpoint(id);
 				delegates.put(id, delegate);
 				final ServiceEndpoint ep = delegate;
@@ -616,9 +616,9 @@ final class UDPEndpointProvider extends EndpointProvider {
 		}
 
 		protected void read() {
-			while(!Thread.interrupted()){
+			while(!Thread.interrupted()) {
 				if(isClosed) return;
-				try{
+				try {
 					Packet packet = root.read(Packet::new);
 					switch(packet.action){
 					case OPEN_SERVICE:
@@ -630,7 +630,7 @@ final class UDPEndpointProvider extends EndpointProvider {
 						close(packet.id);
 						break;
 					}
-				}catch(IOException e){
+				} catch(IOException e) {
 					return;
 				}
 			}
@@ -644,13 +644,13 @@ final class UDPEndpointProvider extends EndpointProvider {
 		// close delegate
 		protected void close(long id) {
 			if(!delegates.containsKey(id)) return;
-			try{
+			try {
 				if(!isClosed) root.write(new Packet(id));
-			}catch(IOException e){
+			} catch(IOException e) {
 				// ignore
 			}
 			ServiceEndpoint delegate = delegates.remove(id);
-			if(delegate != null){
+			if(delegate != null) {
 				delegate.setClosed();
 			}
 			// notify subclass
@@ -667,25 +667,25 @@ final class UDPEndpointProvider extends EndpointProvider {
 		
 		public synchronized void dispose(boolean notify) {
 			delegates.entrySet().forEach(e -> {
-				try{
+				try {
 					root.write(new Packet(e.getKey()));
-				}catch(IOException ex){
+				} catch(IOException ex) {
 					// ignore
 				}
 			});
 			delegates.clear();
 			// give some time to notify remote peers
-			try{
+			try {
 				TimeUnit.MILLISECONDS.sleep(250);
-			}catch(Exception z){
+			} catch(Exception z) {
 				// ignore
 			}
 			
-			try{
+			try {
 				if(notify) root.writeRaw(new byte[]{SecureEndpoint.CLOSE});
 				future.cancel(true);
 				root.close();
-			}catch(Exception e){
+			} catch(Exception e) {
 				// ignore
 			}
 			
@@ -731,9 +731,9 @@ final class UDPEndpointProvider extends EndpointProvider {
 			public <T> T read(Decoder<T> decoder) throws IOException {
 				if(!isOpen) throw new IOException("Endpoint not open");
 				
-				try{
+				try {
 					return decoder.decode(queue.take());
-				}catch(InterruptedException e){
+				} catch(InterruptedException e) {
 					return null;
 				}
 			}
@@ -750,7 +750,7 @@ final class UDPEndpointProvider extends EndpointProvider {
 			}
 			
 			private void setClosed() {
-				if(consumer != null){
+				if(consumer != null) {
 					executor.submit(() -> consumer.accept(ConnectionState.CLOSED));
 				}
 			}
