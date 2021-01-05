@@ -101,8 +101,6 @@ final class UDPEndpointProvider extends EndpointProvider {
 	final Map<Address,Muxx> map = new HashMap<>();
 	// local connections (from/to ourself)
 	final Map<Long,LocalConnection> localConnections = new HashMap<>();
-	// our address
-	private Address me;
 	
 	private long activityTimeout = DEFAULT_ACTIVITY_TIMEOUT;
 	private long sendTimeout = DEFAULT_SEND_TIMEOUT;
@@ -115,23 +113,12 @@ final class UDPEndpointProvider extends EndpointProvider {
 	private boolean initialized = false;
 	private InetSocketAddress socketAddress;
 	
-	@Deprecated
-	public UDPEndpointProvider(NetworkExecutor executor, InetSocketAddress socketAddress, Address address, SocketAddress serverAddress) {
-		super(socketAddress, address);
-		
-		this.executor = new NetworkExecutor();
-		this.serverAddress = serverAddress;
-		
-		me = address;
-	}
-	
 	public UDPEndpointProvider(InetSocketAddress socketAddress, Address address, SocketAddress serverAddress) {
 		super(socketAddress, address);
 		
 		this.serverAddress = serverAddress;
 		
 		executor = new NetworkExecutor();
-		me = address;
 	}
 
 	private void start() {
@@ -206,7 +193,7 @@ final class UDPEndpointProvider extends EndpointProvider {
 		// check here to avoid deadlock - see ServiceAdmin.initialize()
 		
 		// check if we are connecting to ourself
-		if(me.equals(host)) {
+		if(this.address.equals(host)) {
 			return localConnections.computeIfAbsent(id, k -> {
 				try {
 					LocalConnection local = new LocalConnection();

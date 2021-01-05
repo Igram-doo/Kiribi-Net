@@ -59,20 +59,6 @@ public abstract class EndpointProvider {
 		
 	/**
 	 * Returns a udp endpoint provider.
-	 *
-	 * @param executor The executor the returned endpoint provider will use.	 
-	 * @param socketAddress The socket address this endpoint provider will use.
-	 * @param address The address the returned endpoint provider will use.
-	 * @param nattAddress The socket address of the NATT server the returned endpoint provider will use.
-	 * @return Returns a udp endpoint provider.
-	 */
-	@Deprecated
-	public static EndpointProvider udp(NetworkExecutor executor, InetSocketAddress socketAddress, Address address, InetSocketAddress nattAddress) {
-		return new UDPEndpointProvider(executor, socketAddress, address, nattAddress);
-	}
-		
-	/**
-	 * Returns a udp endpoint provider.
 	 * 
 	 * @param socketAddress The socket address this endpoint provider will use.
 	 * @param address The address the returned endpoint provider will use.
@@ -86,38 +72,11 @@ public abstract class EndpointProvider {
 	/**
 	 * Returns a tcp endpoint provider.
 	 * 
-	 * @param socketAddress The socket address this endpoint provider will use.
-	 * @param address The address the returned endpoint provider will use.
-	 * @param lookupAddress The socket address of the Lookup server the returned endpoint provider will use.
-	 * @return Returns a tcp endpoint provider.
-	 */
-	@Deprecated
-	public static EndpointProvider tcp(InetSocketAddress socketAddress, Address address, InetSocketAddress lookupAddress) {
-		return new TCPEndpointProvider(socketAddress, address, lookupAddress);
-	}
-		
-	/**
-	 * Returns a tcp endpoint provider.
-	 * 
 	 * @param mapper The address mapper this endpoint provider will use.
 	 * @return Returns a tcp endpoint provider.
 	 */
 	public static EndpointProvider tcp(AddressMapper mapper) {
 		return new TCPEndpointProvider(mapper);
-	}
-		
-	/**
-	 * Returns a lan endpoint provider.
-	 *
-	 * @param executor The executor the returned endpoint provider will use.	 
-	 * @param socketAddress The socket address this endpoint provider will use.
-	 * @param address The address the returned endpoint provider will use.
-	 * @param groupAddress The socket address of the multicast group the returned endpoint provider will use.
-	 * @return Returns a lan endpoint provider.
-	 */
-	@Deprecated
-	public static EndpointProvider lan(NetworkExecutor executor, InetSocketAddress socketAddress, Address address, InetSocketAddress groupAddress) {
-		return new LANEndpointProvider(executor, socketAddress, address, groupAddress);
 	}
 
 	/**

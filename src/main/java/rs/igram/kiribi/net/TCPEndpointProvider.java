@@ -40,13 +40,6 @@ final class TCPEndpointProvider extends EndpointProvider {
 	private ServerEndpoint server;
 	private boolean initialized = false;
 	
-	@Deprecated
-	public TCPEndpointProvider(InetSocketAddress socketAddress, Address address, InetSocketAddress serverAddress) {
-		super(socketAddress, address);
-		
-		mapper = AddressMapper.lookup(address, socketAddress, serverAddress);
-	}
-	
 	public TCPEndpointProvider(AddressMapper mapper) {
 		super(mapper.socketAddress, mapper.address);
 		
