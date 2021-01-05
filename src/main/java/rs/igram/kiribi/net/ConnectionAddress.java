@@ -24,18 +24,30 @@
  
 package rs.igram.kiribi.net;
 
-//import rs.igram.kiribi.crypto.Address;
+import java.util.Random;
 
 /**
- * An instance of this class represents a UDP connection address.
+ * An instance of this class represents a remote peer address.
  *
  * @author Michael Sargent
  */
 public final class ConnectionAddress {
+	private static final Random random = new Random();
+	
 	/** The address of this <code>ConnectionAddress</code> instance. */
 	public final Address address;
 	/** The id of this <code>ConnectionAddress</code> instance. */
 	public final long id;
+		
+	/**
+	 * Instantiates a new <code>ConnectionAddress</code> instance with a random id.
+	 *
+	 * @param address The address of this <code>ConnectionAddress</code> instance.
+	 */
+	public ConnectionAddress(Address address) {
+		this.address = address;
+		this.id = random.nextLong();
+	}
 		
 	/**
 	 * Instantiates a new <code>ConnectionAddress</code> instance.

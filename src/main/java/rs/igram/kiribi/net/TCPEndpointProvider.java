@@ -36,21 +36,32 @@ import rs.igram.kiribi.net.stack.lookup.Lookup;
  * @author Michael Sargent
  */
 final class TCPEndpointProvider extends EndpointProvider {
-	final Lookup lookup;
+	final AddressMapper mapper;
 	private ServerEndpoint server;
+	private boolean initialized = false;
 	
+	@Deprecated
 	public TCPEndpointProvider(InetSocketAddress socketAddress, Address address, InetSocketAddress serverAddress) {
 		super(socketAddress, address);
 		
-		lookup = new Lookup(address, socketAddress, serverAddress);
+		mapper = AddressMapper.lookup(address, socketAddress, serverAddress);
+	}
+	
+	public TCPEndpointProvider(AddressMapper mapper) {
+		super(mapper.socketAddress, mapper.address);
+		
+		this.mapper = mapper;
 	}
 
 	@Override
 	public Endpoint open(ConnectionAddress address)
 		throws IOException, InterruptedException {
 
+		init();
+		InetSocketAddress remoteAddress = mapper.lookup(address.address);
+		if (remoteAddress == null) return null;
 		try{
-			return TCPEndpointFactory.open(lookup.lookup(address.address));
+			return TCPEndpointFactory.open(remoteAddress);
 		}catch(Exception e){
 			throw new IOException(e);
 		}
@@ -59,12 +70,35 @@ final class TCPEndpointProvider extends EndpointProvider {
 	@Override
 	public ServerEndpoint server() 
 		throws IOException, InterruptedException, TimeoutException {
-			
+		
+		init();
 		if (server == null || !server.isOpen())  {		
-			lookup.register();
+			mapper.register();
 			server =  TCPEndpointFactory.server(socketAddress);
 		}
 		
 		return server;
+	}
+	
+	@Override
+	public void shutdown() {
+		synchronized(this) {
+			if (!initialized) return;
+			try{
+				mapper.unregister();
+			}catch(Exception e){
+				// ignore
+			}
+			mapper.close();
+			initialized = false;
+		}
+	}
+	
+	private void init() throws IOException {
+		synchronized(this) {
+			if (initialized) return;
+			mapper.init();
+			initialized = true;
+		}
 	}
 }

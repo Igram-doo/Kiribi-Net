@@ -91,7 +91,7 @@ public final class Lookup {
 		}
 	}
 	
-	public SocketAddress lookup(Address address) throws IOException, InterruptedException {
+	public InetSocketAddress lookup(Address address) throws IOException, InterruptedException {
 		VarOutputStream out = new VarOutputStream();
 		out.write(LOOKUP);
 		out.write(address);

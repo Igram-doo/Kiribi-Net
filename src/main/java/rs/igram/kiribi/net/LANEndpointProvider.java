@@ -35,6 +35,7 @@ import rs.igram.kiribi.net.stack.discovery.Discovery;
  *
  * @author Michael Sargent
  */
+@Deprecated
 final class LANEndpointProvider extends EndpointProvider {
 	final Discovery discovery;
 	private ServerEndpoint server;

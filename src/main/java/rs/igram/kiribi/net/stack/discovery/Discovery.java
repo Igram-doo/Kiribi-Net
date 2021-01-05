@@ -66,10 +66,20 @@ public final class Discovery {
 	private MembershipKey key;
 	
 	private final Object stateLock = new Object(){};
-	
-    
+	    
+	@Deprecated
 	public Discovery(NetworkExecutor executor, Address address, InetSocketAddress socketAddress, InetSocketAddress group) {
-		this.executor = executor;
+		//this.executor = executor;
+		this.group = group;
+		
+		byte[] buf = new byte[40];
+		byte[] encoded = address.bytes();
+		System.arraycopy(encoded, 0, buf, 0, 20);
+		ByteUtils.inet(buf, 20, socketAddress);
+		out = ByteBuffer.wrap(buf);
+	}
+	    
+	public Discovery(Address address, InetSocketAddress socketAddress, InetSocketAddress group) {
 		this.group = group;
 		
 		byte[] buf = new byte[40];
@@ -82,6 +92,7 @@ public final class Discovery {
 	public void start() throws IOException {
 		synchronized(stateLock) {
 			if (!started) {
+				executor = new NetworkExecutor();
 				// ick - fix
 				MulticastSocket msock = new MulticastSocket();
 				NetworkInterface ifc = msock.getNetworkInterface();
@@ -125,6 +136,7 @@ public final class Discovery {
 				} catch(IOException e) {
 					// ignore
 				}
+				//executor.shutdown();
 			}
 		}
 	}

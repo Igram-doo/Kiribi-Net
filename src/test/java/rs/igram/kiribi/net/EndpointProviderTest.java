@@ -68,9 +68,8 @@ public class EndpointProviderTest {
 		PublicKey key1 = KeyPairGenerator.generateKeyPair().getPublic();
 		Address address1 = new Address(key1);
 		InetSocketAddress socketAddress1 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 6888);
-		NetworkExecutor executor1 = new NetworkExecutor();		
-		InetSocketAddress group1 = new InetSocketAddress(InetAddress.getByName("233.0.0.0"), 4769);
-		Discovery discovery1 = new Discovery(executor1, address1, socketAddress1, group1);		
+		InetSocketAddress group1 = new InetSocketAddress(InetAddress.getByName("233.0.0.0"), 4769);	
+		Discovery discovery1 = new Discovery(address1, socketAddress1, group1);		
    	    discovery1.start();
    	    
    	    Thread.sleep(500);
@@ -79,9 +78,8 @@ public class EndpointProviderTest {
    	    PublicKey key2 = KeyPairGenerator.generateKeyPair().getPublic();
 		Address address2 = new Address(key2);
 		InetSocketAddress socketAddress2 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 6889);
-		NetworkExecutor executor2 = new NetworkExecutor();	
-		InetSocketAddress group2 = new InetSocketAddress(InetAddress.getByName("233.0.0.0"), 4769);
-		Discovery discovery2 = new Discovery(executor2, address2, socketAddress2, group2);		
+		InetSocketAddress group2 = new InetSocketAddress(InetAddress.getByName("233.0.0.0"), 4769);		
+		Discovery discovery2 = new Discovery(address2, socketAddress2, group2);		
    	    discovery2.start();
    	    
    	    Thread.sleep(500);
@@ -114,7 +112,6 @@ public class EndpointProviderTest {
    	    PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
 		Address address = new Address(key);
    	    int port2 = 6731;
-		NetworkExecutor executor = new NetworkExecutor();
 		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port2);
 		Lookup lookup = new Lookup(address, socketAddress, lookupAddress);
 		
@@ -130,19 +127,19 @@ public class EndpointProviderTest {
 	@Test
 	public void testTCP() throws IOException, InterruptedException, Exception {
 		int port = 6732;
-		NetworkExecutor executor = new NetworkExecutor();
 		PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
 		Address address = new Address(key);
 		InetSocketAddress serverAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), LookupServer.SERVER_PORT);
 		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port);
-		EndpointProvider provider = EndpointProvider.tcp(socketAddress, address, serverAddress);
-		ConnectionAddress connectionAddress = new ConnectionAddress(address, 1l);
+		AddressMapper mapper = AddressMapper.lookup(address, socketAddress, serverAddress);
+		EndpointProvider provider = EndpointProvider.tcp(mapper);
+		ConnectionAddress connectionAddress = new ConnectionAddress(address);
 		
 		LookupServer server = new LookupServer();
    	   	server.start(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), LookupServer.SERVER_PORT));
    	   	
    	   	
-		ProviderTest test = new ProviderTest(executor, provider, connectionAddress);
+		ProviderTest test = new ProviderTest(provider, connectionAddress);
 		test.run(6732);
    	   
 		assertTrue(test.openSuccess);
@@ -151,21 +148,53 @@ public class EndpointProviderTest {
 	}
 	
 	@Test
-	public void testUDP() throws IOException, InterruptedException, Exception {
+	public void testUDPSameAddress() throws IOException, InterruptedException, Exception {
 		int port = 6733;
-		NetworkExecutor executor = new NetworkExecutor();
 		PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
 		Address address = new Address(key);
 		InetSocketAddress serverAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), NATTServer.SERVER_PORT);
 		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port);
-		EndpointProvider provider = EndpointProvider.udp(executor, socketAddress, address, serverAddress);		
-		ConnectionAddress connectionAddress = new ConnectionAddress(address, 1l);
+		EndpointProvider provider = EndpointProvider.udp(socketAddress, address, serverAddress);		
+		ConnectionAddress connectionAddress = new ConnectionAddress(address);
 		
 		NATTServer server = new NATTServer();
    	   	server.start(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), NATTServer.SERVER_PORT));
    	   	
-		ProviderTest test = new ProviderTest(executor, provider, connectionAddress);
+		ProviderTest test = new ProviderTest(provider, connectionAddress);
 		test.run(port);
+   	   
+		assertTrue(test.openSuccess);
+		assertTrue(test.readSuccess);
+		assertTrue(test.writeSuccess);
+		
+		server.shutdown();
+		
+	}
+	
+	@Test
+	public void testUDPDifferentAddresses() throws IOException, InterruptedException, Exception {
+		int serverPort = NATTServer.SERVER_PORT + 1;
+		int port1 = 4733;
+		int port2 = 4734;
+		PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
+		Address address1 = new Address(key);
+		key = KeyPairGenerator.generateKeyPair().getPublic();
+		Address address2 = new Address(key);
+		
+		InetSocketAddress serverAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), serverPort);
+		InetSocketAddress socketAddress1 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port1);
+		InetSocketAddress socketAddress2 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port2);
+		EndpointProvider provider1 = EndpointProvider.udp(socketAddress1, address1, serverAddress);		
+		ConnectionAddress connectionAddress1 = new ConnectionAddress(address1);
+		
+		EndpointProvider provider2 = EndpointProvider.udp(socketAddress2, address2, serverAddress);		
+		ConnectionAddress connectionAddress2 = new ConnectionAddress(address2);
+		
+		NATTServer server = new NATTServer();
+   	   	server.start(serverAddress);
+   	   	
+		ProviderTest2 test = new ProviderTest2(provider1, connectionAddress1, provider2, connectionAddress2);
+		test.run(port1, port2);
    	   
 		assertTrue(test.openSuccess);
 		assertTrue(test.readSuccess);
@@ -177,15 +206,15 @@ public class EndpointProviderTest {
 	@Test
 	public void testLAN() throws IOException, InterruptedException, Exception {
 		int port = 6733;
-		NetworkExecutor executor = new NetworkExecutor();
 		PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
 		Address address = new Address(key);
 		InetSocketAddress group = EndpointProvider.defaultGroup();
 		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port);
-		EndpointProvider provider = EndpointProvider.lan(executor, socketAddress, address, group);		
-		ConnectionAddress connectionAddress = new ConnectionAddress(address, 1l);
+		AddressMapper mapper = AddressMapper.discovery(address, socketAddress, group);
+		EndpointProvider provider = EndpointProvider.tcp(mapper);	
+		ConnectionAddress connectionAddress = new ConnectionAddress(address);
 		
-		ProviderTest test = new ProviderTest(executor, provider, connectionAddress);
+		ProviderTest test = new ProviderTest(provider, connectionAddress);
 		test.run(port);
    	   
 		assertTrue(test.openSuccess);
@@ -204,12 +233,11 @@ public class EndpointProviderTest {
    	   CountDownLatch availableSignal = new CountDownLatch(1);
    	   CountDownLatch openSignal = new CountDownLatch(1);
    	   
-   	   NetworkExecutor executor;
+   	   NetworkExecutor executor = new NetworkExecutor();
    	   EndpointProvider provider;
    	   ConnectionAddress address;
    	   
-   	   ProviderTest( NetworkExecutor executor, EndpointProvider provider, ConnectionAddress address) {
-   	   	   this.executor = executor;
+   	   ProviderTest(EndpointProvider provider, ConnectionAddress address) {
    	   	   this.provider = provider;
    	   	   this.address = address;
    	   }
@@ -238,7 +266,67 @@ public class EndpointProviderTest {
    	   	   			readSuccess = msg1.equals(msg);
    	   	   			e.write(msg2);
    	   	   		} catch(Exception ex) {
-   	   	   			
+   	   	   			ex.printStackTrace();
+   	   	   		} finally {
+   	   	   			openSignal.countDown();
+   	   	   		}
+   	   	   });
+   	   }
+   }
+   
+	private static class ProviderTest2 {
+   	   boolean openSuccess = false;
+   	   boolean readSuccess = false;
+   	   boolean writeSuccess = false;
+   	     	   
+   	   Message msg1 = new Message("a");
+   	   Message msg2 = new Message("b");
+   	   	   
+   	   CountDownLatch availableSignal = new CountDownLatch(1);
+   	   CountDownLatch openSignal = new CountDownLatch(1);
+   	   
+   	   NetworkExecutor executor = new NetworkExecutor();
+   	   EndpointProvider provider1;
+   	   ConnectionAddress address1;
+   	   EndpointProvider provider2;
+   	   ConnectionAddress address2;
+   	   
+   	   ProviderTest2(
+   	   	   EndpointProvider provider1, ConnectionAddress address1,
+   	   	   EndpointProvider provider2, ConnectionAddress address2) {
+   	   
+   	   	   this.provider1 = provider1;
+   	   	   this.address1 = address1;
+   	   	   this.provider2 = provider2;
+   	   	   this.address2 = address2;
+   	   }
+   	   
+   	   void run(int port1, int port2) throws IOException, InterruptedException, Exception {
+   	   	   availableSignal.countDown();
+   	   	   availableSignal.await(3, TimeUnit.SECONDS);
+   	   	   
+   	   	   ServerEndpoint se = provider1.server();
+   	   	   se.accept(this::accept);
+   	   	   
+   	   	   Endpoint e = provider2.open(address1);
+   	   	   e.write(msg1);
+   	   	   Message msg = e.read(Message::new);
+   	   	   writeSuccess = msg2.equals(msg);
+   	   	   
+   	   	   openSignal.await(3, TimeUnit.SECONDS);
+   	   	    	   	   
+   	   }
+   	   
+   	   void accept(Endpoint e) {
+   	   	   executor.submit(() -> {
+   	   	   		openSuccess = true;
+   	   	   		
+   	   	   		try {
+   	   	   			Message msg = e.read(Message::new);
+   	   	   			readSuccess = msg1.equals(msg);
+   	   	   			e.write(msg2);
+   	   	   		} catch(Exception ex) {
+   	   	   			ex.printStackTrace();
    	   	   		} finally {
    	   	   			openSignal.countDown();
    	   	   		}

@@ -115,12 +115,22 @@ final class UDPEndpointProvider extends EndpointProvider {
 	private boolean initialized = false;
 	private InetSocketAddress socketAddress;
 	
+	@Deprecated
 	public UDPEndpointProvider(NetworkExecutor executor, InetSocketAddress socketAddress, Address address, SocketAddress serverAddress) {
 		super(socketAddress, address);
 		
-		this.executor = executor;
+		this.executor = new NetworkExecutor();
 		this.serverAddress = serverAddress;
 		
+		me = address;
+	}
+	
+	public UDPEndpointProvider(InetSocketAddress socketAddress, Address address, SocketAddress serverAddress) {
+		super(socketAddress, address);
+		
+		this.serverAddress = serverAddress;
+		
+		executor = new NetworkExecutor();
 		me = address;
 	}
 
@@ -209,7 +219,7 @@ final class UDPEndpointProvider extends EndpointProvider {
 				}
 			}).proxy;
 		}
-		
+
 		// check if mux already exists for the address
 		Muxx mux = null;
 		synchronized(lock) {
