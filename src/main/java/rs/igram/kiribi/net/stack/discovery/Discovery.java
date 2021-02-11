@@ -72,8 +72,8 @@ public final class Discovery {
 		//this.executor = executor;
 		this.group = group;
 		
-		byte[] buf = new byte[40];
-		byte[] encoded = address.bytes();
+		var buf = new byte[40];
+		var encoded = address.bytes();
 		System.arraycopy(encoded, 0, buf, 0, 20);
 		ByteUtils.inet(buf, 20, socketAddress);
 		out = ByteBuffer.wrap(buf);
@@ -82,8 +82,8 @@ public final class Discovery {
 	public Discovery(Address address, InetSocketAddress socketAddress, InetSocketAddress group) {
 		this.group = group;
 		
-		byte[] buf = new byte[40];
-		byte[] encoded = address.bytes();
+		var buf = new byte[40];
+		var encoded = address.bytes();
 		System.arraycopy(encoded, 0, buf, 0, 20);
 		ByteUtils.inet(buf, 20, socketAddress);
 		out = ByteBuffer.wrap(buf);
@@ -94,8 +94,8 @@ public final class Discovery {
 			if (!started) {
 				executor = new NetworkExecutor();
 				// ick - fix
-				MulticastSocket msock = new MulticastSocket();
-				NetworkInterface ifc = msock.getNetworkInterface();
+				var msock = new MulticastSocket();
+				var ifc = msock.getNetworkInterface();
 				msock.close();
 				channel = DatagramChannel.open(StandardProtocolFamily.INET)
 					.setOption(StandardSocketOptions.SO_REUSEADDR, true)
@@ -146,15 +146,15 @@ public final class Discovery {
 			if (key.isValid()) {
 				try {
 					in.clear();
-					InetSocketAddress remoteAddress = (InetSocketAddress) channel.receive(in);
+					var remoteAddress = (InetSocketAddress) channel.receive(in);
 					in.flip();
 
-					byte[] buf = in.array();
-					Address address = new Address(ByteUtils.crop(buf, 20));
-					InetSocketAddress socketAddress = (InetSocketAddress)ByteUtils.inet(buf, 20);
+					var buf = in.array();
+					var address = new Address(ByteUtils.crop(buf, 20));
+					var socketAddress = (InetSocketAddress)ByteUtils.inet(buf, 20);
 					
 					executor.submit(() -> {
-						boolean exists = false;
+						var exists = false;
 						synchronized(map) {
 							exists = map.containsKey(address);
 							map.put(address, socketAddress);

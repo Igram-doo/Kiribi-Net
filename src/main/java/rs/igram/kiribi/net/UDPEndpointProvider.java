@@ -185,8 +185,8 @@ final class UDPEndpointProvider extends EndpointProvider {
 
 		start();
 		
-		long id = address.id;
-		Address host = address.address;
+		var id = address.id;
+		var host = address.address;
 		// result
 		Endpoint endpoint = null;
 		
@@ -196,7 +196,7 @@ final class UDPEndpointProvider extends EndpointProvider {
 		if(this.address.equals(host)) {
 			return localConnections.computeIfAbsent(id, k -> {
 				try {
-					LocalConnection local = new LocalConnection();
+					var local = new LocalConnection();
 					// connect service
 					executor.submit(() -> consumer.accept(local.service));
 					return local;
@@ -313,12 +313,12 @@ final class UDPEndpointProvider extends EndpointProvider {
 
 	// rmp consumer
 	private void accept(SocketAddress address, byte[] data) {
-		byte flag = data[0];
+		var flag = data[0];
 		// if already opened as proxy, 2nd arg to mux ignored so if 
 		// it doesn't already exit assume its a server
 		
 		synchronized(lock) {
-			Muxx mux = muxes.get(address);
+			var mux = muxes.get(address);
 			switch(flag){
 			case SecureEndpoint.INIT:
 				if(mux == null) {
@@ -333,7 +333,7 @@ final class UDPEndpointProvider extends EndpointProvider {
 			case SecureEndpoint.DATA:
 				if(mux == null) {
 					// reset remote peer
-					byte[] b = new byte[]{SecureEndpoint.RESET};
+					var b = new byte[]{SecureEndpoint.RESET};
 					try {
 						stack.send(address, b);
 					} catch(InterruptedException x) {}
@@ -353,8 +353,8 @@ final class UDPEndpointProvider extends EndpointProvider {
 	}
 
 	private Muxx openMux(SocketAddress sa, boolean isProxy) {
-		MUXEndpoint ep = new MUXEndpoint(sa);
-		Muxx mux = new Muxx(ep);
+		var ep = new MUXEndpoint(sa);
+		var mux = new Muxx(ep);
 		muxes.put(sa, mux);
 		executor.submit(() -> {
 			try {
@@ -369,7 +369,7 @@ final class UDPEndpointProvider extends EndpointProvider {
 	}
 	
 	private void resetMux(Muxx mux, SocketAddress sa, boolean isProxy) {
-		MUXEndpoint ep = new MUXEndpoint(sa);
+		var ep = new MUXEndpoint(sa);
 		executor.submit(() -> {
 			try {
 				ep.connect(isProxy);
@@ -430,7 +430,7 @@ final class UDPEndpointProvider extends EndpointProvider {
 		
 		@Override
 		protected Endpoint connect(boolean isProxy) throws IOException {
-			CompletableFuture<Endpoint> f = new CompletableFuture<>();
+			var f = new CompletableFuture<Endpoint>();
 			executor.submit(() -> {
 				try {
 					Endpoint ep = super.connect(isProxy);
@@ -454,7 +454,7 @@ final class UDPEndpointProvider extends EndpointProvider {
 		protected void writeRaw(byte[] b) throws IOException {
 			if(isClosed) throw new IOException("SecureEndpoint is closed");
 			try {
-				boolean success = stack.send(address, b).get(sendTimeout, TimeUnit.MILLISECONDS);
+				var success = stack.send(address, b).get(sendTimeout, TimeUnit.MILLISECONDS);
 				if(!success) {
 					throw new IOException("Send failed...");
 				} else {
@@ -516,11 +516,11 @@ final class UDPEndpointProvider extends EndpointProvider {
 		LocalEndpoint service;
 		
 		LocalConnection() throws IOException {
-			PipedInputStream proxyIn = new PipedInputStream();
-			PipedOutputStream serviceOut = new PipedOutputStream(proxyIn);
+			var proxyIn = new PipedInputStream();
+			var serviceOut = new PipedOutputStream(proxyIn);
 			
-			PipedInputStream serviceIn = new PipedInputStream();
-			PipedOutputStream proxyOut = new PipedOutputStream(serviceIn);
+			var serviceIn = new PipedInputStream();
+			var proxyOut = new PipedOutputStream(serviceIn);
 			
 			proxy = new LocalEndpoint(proxyIn, proxyOut);
 			service = new LocalEndpoint(serviceIn, serviceOut);
@@ -602,7 +602,7 @@ final class UDPEndpointProvider extends EndpointProvider {
 		// pass off to delegate for processing
 		protected void process(long id, byte[] b) {
 			if(isClosed) return;
-			ServiceEndpoint delegate = delegates.get(id);
+			var delegate = delegates.get(id);
 			if(delegate == null) {
 				delegate = new ServiceEndpoint(id);
 				delegates.put(id, delegate);
@@ -616,7 +616,7 @@ final class UDPEndpointProvider extends EndpointProvider {
 			while(!Thread.interrupted()) {
 				if(isClosed) return;
 				try {
-					Packet packet = root.read(Packet::new);
+					var packet = root.read(Packet::new);
 					switch(packet.action){
 					case OPEN_SERVICE:
 						break;
@@ -646,7 +646,7 @@ final class UDPEndpointProvider extends EndpointProvider {
 			} catch(IOException e) {
 				// ignore
 			}
-			ServiceEndpoint delegate = delegates.remove(id);
+			var delegate = delegates.remove(id);
 			if(delegate != null) {
 				delegate.setClosed();
 			}

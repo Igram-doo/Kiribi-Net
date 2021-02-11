@@ -123,10 +123,10 @@ public final class RMPProcessor extends Processor {
 	@Override
 	public void start() {
 		processor = submit(() -> {
-			int cnt = 0;
+			var cnt = 0;
 			while(!Thread.currentThread().isInterrupted()){			
 				try{
-					Object o = queue.poll(25, TimeUnit.MILLISECONDS);
+					var o = queue.poll(25, TimeUnit.MILLISECONDS);
 					if(o == null){
 						checkTimeouts();
 						cnt = 0;
@@ -167,27 +167,27 @@ public final class RMPProcessor extends Processor {
 	}
 	
 	public Future<Boolean> send(SocketAddress address, byte[] data) throws InterruptedException {
-		SendRequest request = new SendRequest(address, data);
+		var request = new SendRequest(address, data);
 		queue.add(request);
 		
 		return request.future;
 	}
 	
 	private void doSend(SendRequest request) throws InterruptedException {
-		long id = sessionCounter++;
-		TransmittingSession session = new TransmittingSession(request.address, id, request.future);
+		var id = sessionCounter++;
+		var session = new TransmittingSession(request.address, id, request.future);
 		transmitters.put(new Key(request.address, id), session);
 		session.transmit(request.data);
 	}
 	
 	private void doProcess(DatagramPacket p){		
-		SocketAddress address = p.getSocketAddress();
-		byte[] buf = p.getData();
-		long id = sessionId(buf);
-		Key key = new Key(address, id);
-		byte cmd = cmd(buf);
+		var address = p.getSocketAddress();
+		var buf = p.getData();
+		var id = sessionId(buf);
+		var key = new Key(address, id);
+		var cmd = cmd(buf);
 		if(cmd < 10){
-			ReceivingSession session = cmd == SYN ?
+			var session = cmd == SYN ?
 				receivers.computeIfAbsent(key, k -> {
 					return new ReceivingSession(address, id);
 				}) : 
@@ -195,15 +195,15 @@ public final class RMPProcessor extends Processor {
 			// ignore if already disposed
 			if(session != null) session.process(cmd, p);
 		}else{
-			TransmittingSession session = transmitters.get(key);
+			var session = transmitters.get(key);
 			// ignore if no corresponding transmitter
 			if(session != null) session.process(cmd, p);
 		}
 	}
 	
 	private void checkTimeouts() {
-		long now = System.currentTimeMillis();
-		boolean required = transmitters.size() > 0 || receivers.size() > 0;
+		var now = System.currentTimeMillis();
+		var required = transmitters.size() > 0 || receivers.size() > 0;
 		if(required && now - timerMark > TIMER_INTERVAL){
 			timerMark = now;
 			try{
@@ -351,7 +351,7 @@ public final class RMPProcessor extends Processor {
 		void timeout() {}
 		
 		DatagramPacket packet() {
-			byte[] buf = new byte[MAX_PAYLOAD_SIZE];
+			var buf = new byte[MAX_PAYLOAD_SIZE];
 			return new DatagramPacket(buf, MAX_PAYLOAD_SIZE, address);
 		}
 		
@@ -430,14 +430,14 @@ public final class RMPProcessor extends Processor {
 		
 		// process incoming syn msg
 		void syn(DatagramPacket p) {
-			byte[] buf = p.getData();
-			long len = bytesToUnsignedInt(buf, 6);
+			var buf = p.getData();
+			var len = bytesToUnsignedInt(buf, 6);
 			// init session
 			data = new byte[(int)len];
 			length(len);
 			seg = new ReceivingSegment(0);
 			// ack
-			int l = pack(ACK, buf);
+			var l = pack(ACK, buf);
 			p.setLength(l);
 			deliver(p);
 			
@@ -448,11 +448,11 @@ public final class RMPProcessor extends Processor {
 		void dat(DatagramPacket p) {
 			if(seg == null) return;
 			if(state == INIT) state = TRANSCEIVING;
-			byte[] buf = p.getData();
+			var buf = p.getData();
 			// sequence number
-			long seqno = seqno(buf);
+			var seqno = seqno(buf);
 			// seqment number
-			long segn = segno(seqno);
+			var segn = segno(seqno);
 			// drop if not current or next segment - won't gt any after this seg but could 
 			// pick up a delayed packet from a previous seg if the packet was retransmitted
 			if(segn < segNo || segn > segNo + 1) return;
@@ -466,13 +466,13 @@ public final class RMPProcessor extends Processor {
 			}
 			
 			// length of chunk - header is 10 bytes
-			int l = p.getLength() - 10;
+			var l = p.getLength() - 10;
 			// sanity check 
 			assert(l == (segn == (maxSeqs - 1) ? finalChunkSize : MAX_CHUNK_SIZE));
 			
-			byte[] data = extract(buf, 10, l);
+			var data = extract(buf, 10, l);
 			
-			boolean complete = seg.receive(seqno, data);
+			var complete = seg.receive(seqno, data);
 			if(complete){
 				pack(FIN, segn, buf);
 				deliver(p);
@@ -488,9 +488,9 @@ public final class RMPProcessor extends Processor {
 		
 		// send outgoing nak msg
 		void nak() {
-			DatagramPacket p = packet();
-			byte[] buf = p.getData();
-			int l = pack(NAK, segNo, seg.mask(), buf);
+			var p = packet();
+			var buf = p.getData();
+			var l = pack(NAK, segNo, seg.mask(), buf);
 			p.setLength(l);
 			deliver(p);
 		}
@@ -508,9 +508,9 @@ public final class RMPProcessor extends Processor {
 				return;
 			}
 			
-			DatagramPacket p = packet();
-			byte[] buf = p.getData();
-			int l = 0;
+			var p = packet();
+			var buf = p.getData();
+			var l = 0;
 			
 			switch(state){
 			case INIT:
@@ -569,9 +569,9 @@ public final class RMPProcessor extends Processor {
 			}
 			
 			boolean receive(long seqn, byte[] b) {
-				int index = index(seqn, segNo);
+				var index = index(seqn, segNo);
 				bits.set(index, true);
-				int offset = (int)(seqn * MAX_CHUNK_SIZE);
+				var offset = (int)(seqn * MAX_CHUNK_SIZE);
 				System.arraycopy(b, 0, data, offset, b.length);
 				return bits.cardinality() == chunks;
 			}		
@@ -622,9 +622,9 @@ public final class RMPProcessor extends Processor {
 		
 		// send outgoing syn msg
 		void syn() {
-			DatagramPacket p = packet();
-			byte[] dst = p.getData();
-			int l = pack(SYN, length, dst);
+			var p = packet();
+			var dst = p.getData();
+			var l = pack(SYN, length, dst);
 			p.setLength(l);
 			deliver(p);
 			
@@ -645,8 +645,8 @@ public final class RMPProcessor extends Processor {
 		// process incoming fin msg
 		void fin(DatagramPacket p) {
 			if(state== TRANSCEIVING){
-				byte[] buf = p.getData();
-				long segno = bytesToUnsignedInt(buf, 6);
+				var buf = p.getData();
+				var segno = bytesToUnsignedInt(buf, 6);
 				if(segno == maxSegs - 1){	
 					// completed transmitting message
 					state = COMPLETE;
@@ -738,15 +738,15 @@ public final class RMPProcessor extends Processor {
 			}	
 			
 			void send(int index, boolean retransmit) {
-				byte cmd = retransmit ? RTM : DAT;
-				long seqno = seqno(segno, index);
-				int offset = (int)(seqno * MAX_CHUNK_SIZE);
+				var cmd = retransmit ? RTM : DAT;
+				var seqno = seqno(segno, index);
+				var offset = (int)(seqno * MAX_CHUNK_SIZE);
 				// data length
-				int len = size(seqno);
-				DatagramPacket p = packet();
-				byte[] dst = p.getData();
+				var len = size(seqno);
+				var p = packet();
+				var dst = p.getData();
 				// l = header len + data len
-				int l = pack(cmd, seqno, data, offset, len, dst);
+				var l = pack(cmd, seqno, data, offset, len, dst);
 				p.setLength(l);
 				deliver(p);
 			}
@@ -778,7 +778,7 @@ public final class RMPProcessor extends Processor {
 		public boolean equals(Object o) {
 			if(this == o) return true;
 			if(o != null && o.getClass() == Key.class){
-				Key k = (Key)o;
+				var k = (Key)o;
 				return id == k.id && address.equals(k.address);
 			}
 			return false;

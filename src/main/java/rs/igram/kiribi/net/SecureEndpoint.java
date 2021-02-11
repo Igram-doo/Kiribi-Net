@@ -64,8 +64,8 @@ abstract class SecureEndpoint implements Endpoint {
 		this.isProxy = isProxy;
 			
 		// magic and version
-		byte[] buf = new byte[10];
-		NetVersion version = NetVersion.current();
+		var buf = new byte[10];
+		var version = NetVersion.current();
 
 		if(isProxy){
 			buf[0] = INIT;
@@ -77,7 +77,7 @@ abstract class SecureEndpoint implements Endpoint {
 			if(buf[0] != INIT){
 				throw new IOException("Attempt to initialize connection with wrong control flag: "+buf[0]);
 			}
-			boolean b = Magic.verifyMagic(buf, 2);
+			var b = Magic.verifyMagic(buf, 2);
 			if(!b){
 				throw new IOException("Bad Voodoo");
 			}
@@ -88,7 +88,7 @@ abstract class SecureEndpoint implements Endpoint {
 				throw new IOException("Attempt to initialize connection with wrong control flag: "+buf[0]);
 			}
 			protocolVersion = Math.min(buf[1], version.protocolVersion);
-			boolean b = Magic.verifyMagic(buf, 2);
+			var b = Magic.verifyMagic(buf, 2);
 			if(!b){
 				throw new IOException("Bad Voodoo");
 			}
@@ -100,14 +100,14 @@ abstract class SecureEndpoint implements Endpoint {
 		ByteStream stream = new ByteStream() {
 			@Override
 			public void write(byte[] b) throws IOException {
-				byte[] d = new byte[b.length + 1];
+				var d = new byte[b.length + 1];
 				d[0] = flag;
 				System.arraycopy(b, 0, d, 1, b.length);
 				writeRaw(d);
 			}
 			@Override
 			public byte[] read() throws IOException {
-				byte[] b = readRaw();
+				var b = readRaw();
 				return extract(b, 1, b.length - 1);
 			}
 		};

@@ -146,7 +146,7 @@ public class NetworkMonitor {
 	 */
 	public InetAddress inetAddress() {
 		for(Enumeration<InetAddress> e = networkInterface.getInetAddresses(); e.hasMoreElements();){
-			InetAddress a = e.nextElement();
+			var a = e.nextElement();
 			switch(protocol){
 			case INET: 
 				if(a instanceof Inet4Address && linkLocal == a.isLinkLocalAddress()) return a;
@@ -199,10 +199,10 @@ public class NetworkMonitor {
 	 */	
 	public static NetworkInterface defaultNetworkInterface() throws SocketException {
 		for(Enumeration<NetworkInterface> n = NetworkInterface.getNetworkInterfaces(); n.hasMoreElements();){
-			NetworkInterface i = n.nextElement();
+			var i = n.nextElement();
 			if(!i.isLoopback() && !i.isVirtual() && !i.toString().contains("Teredo")){
 				for(Enumeration<InetAddress> e = i.getInetAddresses(); e.hasMoreElements();){
-					InetAddress a = e.nextElement();
+					var a = e.nextElement();
 					if(a instanceof Inet4Address && !a.isLinkLocalAddress()) return i;
 				}
 			}
@@ -243,7 +243,7 @@ public class NetworkMonitor {
 	 */	
 	public static InetAddress inet(NetworkInterface iface, StandardProtocolFamily protocol, boolean linkLocal) {
 		for(Enumeration<InetAddress> e = iface.getInetAddresses(); e.hasMoreElements();){
-			InetAddress a = e.nextElement();
+			var a = e.nextElement();
 			switch(protocol){
 			case INET: 
 				if(a instanceof Inet4Address && linkLocal == a.isLinkLocalAddress()) return a;

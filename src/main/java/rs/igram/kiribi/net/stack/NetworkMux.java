@@ -116,8 +116,8 @@ public class NetworkMux {
 	
 	protected void read() {
 		while(!Thread.currentThread().isInterrupted()){
-			byte[] buf = new byte[PACKET_SIZE];
-			DatagramPacket p = new DatagramPacket(buf, PACKET_SIZE);
+			var buf = new byte[PACKET_SIZE];
+			var p = new DatagramPacket(buf, PACKET_SIZE);
 			try{
 				socket.receive(p);
 				process(p);
@@ -142,7 +142,7 @@ public class NetworkMux {
 	}
 	
 	public static void inet(byte[] b, SocketAddress address, int OFF_DATA) {
-		InetSocketAddress inet = ((InetSocketAddress)address);
+		var inet = ((InetSocketAddress)address);
 		if(inet.getAddress() instanceof Inet6Address){
 			System.arraycopy(inet.getAddress().getAddress(), 0, b, OFF_DATA, 16);
 		}else{
@@ -169,8 +169,8 @@ public class NetworkMux {
 		}else{
 			inet = extract(src, OFF_DATA, 16);
 		}
-		InetAddress add = InetAddress.getByAddress(inet);
-		int port = getInt(src, OFF_DATA + 16);
+		var add = InetAddress.getByAddress(inet);
+		var port = getInt(src, OFF_DATA + 16);
 		return new InetSocketAddress(add, port);
 	}
 	

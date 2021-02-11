@@ -56,53 +56,53 @@ public final class Lookup {
 	}
 	
 	public void register() throws IOException, InterruptedException {
-		VarOutputStream out = new VarOutputStream();
+		var out = new VarOutputStream();
 		out.write(REGISTER);
 		out.write(address);
 		out.writeAddress(socketAddress);
-		EncodableBytes bytes = new EncodableBytes(out.toByteArray());
-		Endpoint endpoint = open();
+		var bytes = new EncodableBytes(out.toByteArray());
+		var endpoint = open();
 		endpoint.write(bytes);
 		
-		EncodableBytes response = endpoint.read(EncodableBytes::new);
+		var response = endpoint.read(EncodableBytes::new);
 		endpoint.close();
 		
-		VarInputStream in = new VarInputStream(response.bytes());
-		byte b = in.readByte();
+		var in = new VarInputStream(response.bytes());
+		var b = in.readByte();
 		if (b != ACK) {
 			throw new IOException(in.readUTF());
 		}		
 	}
 	
 	public void unregister() throws IOException, InterruptedException {
-		VarOutputStream out = new VarOutputStream();
+		var out = new VarOutputStream();
 		out.write(UNREGISTER);
 		out.write(address);
-		EncodableBytes bytes = new EncodableBytes(out.toByteArray());
-		Endpoint endpoint = open();
+		var bytes = new EncodableBytes(out.toByteArray());
+		var endpoint = open();
 		endpoint.write(bytes);
-		EncodableBytes response = endpoint.read(EncodableBytes::new);
+		var response = endpoint.read(EncodableBytes::new);
 		endpoint.close();
 		
-		VarInputStream in = new VarInputStream(response.bytes());
-		byte b = in.readByte();
+		var in = new VarInputStream(response.bytes());
+		var b = in.readByte();
 		if (b != ACK) {
 			throw new IOException(in.readUTF());
 		}
 	}
 	
 	public InetSocketAddress lookup(Address address) throws IOException, InterruptedException {
-		VarOutputStream out = new VarOutputStream();
+		var out = new VarOutputStream();
 		out.write(LOOKUP);
 		out.write(address);
-		EncodableBytes bytes = new EncodableBytes(out.toByteArray());
-		Endpoint endpoint = open();
+		var bytes = new EncodableBytes(out.toByteArray());
+		var endpoint = open();
 		endpoint.write(bytes);
-		EncodableBytes response = endpoint.read(EncodableBytes::new);
+		var response = endpoint.read(EncodableBytes::new);
 		endpoint.close();
 		
-		VarInputStream in = new VarInputStream(response.bytes());
-		byte b = in.readByte();
+		var in = new VarInputStream(response.bytes());
+		var b = in.readByte();
 		
 		switch(b){
 		case ACK: return in.readAddress();

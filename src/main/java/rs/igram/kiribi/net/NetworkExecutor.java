@@ -102,7 +102,7 @@ public class NetworkExecutor {
 	 * @return Returns a future associated with the provided task.
 	 */
 	public final <T> Future<T> submit(Callable<T> task) {
-		ForkJoinTask<T> t = ForkJoinTask.adapt(task);
+		var t = ForkJoinTask.adapt(task);
 		return executor.submit(t);
 	}
 
@@ -113,7 +113,7 @@ public class NetworkExecutor {
 	 * @return Returns a future associated with the provided task.
 	 */
 	public final Future<?> submit(Runnable task) {
-		ForkJoinTask<?> t = ForkJoinTask.adapt(task);
+		var t = ForkJoinTask.adapt(task);
 		return executor.submit(t);
 	}
 	

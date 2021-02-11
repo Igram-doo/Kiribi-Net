@@ -51,7 +51,7 @@ final class TCPEndpointProvider extends EndpointProvider {
 		throws IOException, InterruptedException {
 
 		init();
-		InetSocketAddress remoteAddress = mapper.lookup(address.address);
+		var remoteAddress = mapper.lookup(address.address);
 		if (remoteAddress == null) return null;
 		try{
 			return TCPEndpointFactory.open(remoteAddress);

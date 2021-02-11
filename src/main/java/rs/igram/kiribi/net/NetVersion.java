@@ -69,7 +69,7 @@ final class NetVersion implements Encodable {
 	@Override
 	public boolean equals(Object obj){
 		if(obj != null && obj instanceof NetVersion){
-			NetVersion v = (NetVersion)obj;
+			var v = (NetVersion)obj;
 			return version == v.version
 				&& serialVersion == v.serialVersion
 				&& protocolVersion == v.protocolVersion;

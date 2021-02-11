@@ -56,8 +56,8 @@ public final class NATTServer extends NATT {
 	
 	@Override
 	void process(DatagramPacket p) {
-		byte[] buf = p.getData();
-		byte protocol = protocol(buf); 
+		var buf = p.getData();
+		var protocol = protocol(buf); 
 		// keepalive
 		if(p.getLength() == 2 && protocol == KAP_PROTOCOL){
 			write(p);
@@ -65,11 +65,11 @@ public final class NATTServer extends NATT {
 		}
 		
 		if(protocol != NATT_PROTOCOL) return;
-		SocketAddress remote = p.getSocketAddress();		
+		var remote = p.getSocketAddress();		
 		
 		int c = buf[OFF_CMD]; // offset long session id + long natt id
 	
-		Address address = address(buf); //reg address or tunnel address
+		var address = address(buf); //reg address or tunnel address
 			
 		switch(c){
 		case REG: // registration request from remote peer

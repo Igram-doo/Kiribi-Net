@@ -94,7 +94,7 @@ public class KAPProcessor extends Processor {
 	
 	@Override
 	public void process(DatagramPacket p) {
-		SocketAddress a = p.getSocketAddress();
+		var a = p.getSocketAddress();
 		if(a.equals(SERVER_ADDRESS)) return;
 		Entry e = null;
 		synchronized(map){
@@ -143,8 +143,8 @@ public class KAPProcessor extends Processor {
 		Set<SocketAddress> notify = new HashSet<>();
 		synchronized(map){
 			map.entrySet().forEach(e -> {
-				SocketAddress a = e.getKey();
-				Entry v = e.getValue();
+				var a = e.getKey();
+				var v = e.getValue();
 				if(v.expired()){
 					expired.add(a);
 				}else if(!v.incoming){

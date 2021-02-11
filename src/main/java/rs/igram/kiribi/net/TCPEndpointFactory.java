@@ -59,7 +59,7 @@ public abstract class TCPEndpointFactory {
 	public static Endpoint open(SocketAddress address)
 		throws IOException, InterruptedException, ExecutionException {
 
-		final AsynchronousSocketChannel channel = AsynchronousSocketChannel.open();
+		final var channel = AsynchronousSocketChannel.open();
 		channel.connect(address).get();
 		return new ChannelEndpoint(channel).connect(true);
 	}
@@ -74,7 +74,7 @@ public abstract class TCPEndpointFactory {
 	public static ServerEndpoint server(SocketAddress socketAddress) 
 		throws IOException {	
 			
-		final AsynchronousServerSocketChannel channel = AsynchronousServerSocketChannel.open();
+		final var channel = AsynchronousServerSocketChannel.open();
 		channel.bind(socketAddress);
 		return  new ServerChannelEndpoint(channel);
 	}
@@ -132,7 +132,7 @@ public abstract class TCPEndpointFactory {
 								channel.accept(null, this);
 							}
 							try{
-								Endpoint endpoint = new ChannelEndpoint(c).connect(false);
+								var endpoint = new ChannelEndpoint(c).connect(false);
 								consumer.accept(endpoint);
 							}catch(IOException e){
 								// couldn't connect - chuck

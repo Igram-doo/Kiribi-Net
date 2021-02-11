@@ -89,12 +89,11 @@ public final class LookupServer {
 	
 	private void accept(Endpoint endpoint) {
 		try{
-			EncodableBytes request = endpoint.read(EncodableBytes::new);
-		
-			VarInputStream in = new VarInputStream(request.bytes());
-			byte b = in.readByte();
-			Address address = in.read(Address::new);
-			InetSocketAddress socketAddress = b == REGISTER ? in.readAddress() : null;
+			var request = endpoint.read(EncodableBytes::new);
+			var in = new VarInputStream(request.bytes());
+			var b = in.readByte();
+			var address = in.read(Address::new);
+			var socketAddress = b == REGISTER ? in.readAddress() : null;
 			
 			switch(b) {
 			case REGISTER:
@@ -123,7 +122,7 @@ public final class LookupServer {
 	}
 	
 	private static EncodableBytes response(InetSocketAddress socketAddress) throws IOException {
-		VarOutputStream out = new VarOutputStream();
+		var out = new VarOutputStream();
 		if (socketAddress == null) {
 			out.write(UNKNOWN);
 		} else {

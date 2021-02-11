@@ -153,7 +153,7 @@ public final class Address implements Encodable {
 	public boolean equals(Object o){
 		if(this == o) return true;
 		if(o != null && o.getClass() == Address.class){
-			Address a = (Address)o;
+			var a = (Address)o;
 			return Arrays.equals(bytes, a.bytes);
 		}
 		return false;

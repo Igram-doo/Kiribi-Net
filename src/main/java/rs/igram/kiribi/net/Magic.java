@@ -60,14 +60,14 @@ final class Magic {
 	private Magic() {}
 	
 	public static byte[] magic() throws IOException {
-		byte[] m = new byte[MAGIC_LEN];
+		var m = new byte[MAGIC_LEN];
 		random(m);
 		ByteUtils.or(m, MAGIC, MAGIC_LEN);
 		return m;
 	}
 	
 	public static void magic(byte[] dst, int offset) throws IOException {
-		byte[] m = new byte[MAGIC_LEN];
+		var m = new byte[MAGIC_LEN];
 		random(m);
 		ByteUtils.or(m, MAGIC, MAGIC_LEN);
 		System.arraycopy(m, 0, dst, offset, MAGIC_LEN);
@@ -79,7 +79,7 @@ final class Magic {
 	}
 	
 	public static boolean verifyMagic(byte[] src, int offset) throws IOException {
-		byte[] m = new byte[MAGIC_LEN];
+		var m = new byte[MAGIC_LEN];
 		System.arraycopy(src, offset, m, 0, MAGIC_LEN);
 		return magic(m);
 	}
@@ -90,7 +90,7 @@ final class Magic {
 	}
 	
 	public static boolean magic(VarInput in) throws IOException {
-		byte[] m = new byte[MAGIC_LEN];
+		var m = new byte[MAGIC_LEN];
 		in.readFully(m);
 		return magic(m);
 	}

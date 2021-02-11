@@ -124,13 +124,13 @@ public final class NATTProcessor extends Processor {
 	public void process(DatagramPacket p) {
 		try{
 			LOGGER.log(FINER, "NATTClient.process: {0}", p.getSocketAddress());
-			SocketAddress address = p.getSocketAddress();
-			byte[] buf = p.getData();
-			int l = p.getLength();
-			if(address.equals(server)){
+			var address = p.getSocketAddress();
+			var buf = p.getData();
+			var l = p.getLength();
+			if (address.equals(server)) {
 				processServerResponse(buf);
 				// natt response - process	
-			}else if(l == 9){
+			} else if (l == 9) {
 				processNATTResponse(p);
 			}
 		}catch(IOException e){
@@ -166,11 +166,11 @@ public final class NATTProcessor extends Processor {
 	// tunnel request from remote peer via server
 	private void tun(byte[] buf) throws IOException {
 		try{
-			final SocketAddress dst = inet(buf);
+			final var dst = inet(buf);
 			submit(() -> {
 				try{
-					long start = System.currentTimeMillis();
-					boolean natted = natt(buf).get(2000, TimeUnit.MILLISECONDS);
+					var start = System.currentTimeMillis();
+					var natted = natt(buf).get(2000, TimeUnit.MILLISECONDS);
 					LOGGER.log(FINER, "TUNNEL: {0} {1} {2}", new Object[]{natted, (System.currentTimeMillis() - start), dst});
 				}catch(Throwable e){
 					LOGGER.log(SEVERE, e.toString(), e);
@@ -194,7 +194,7 @@ public final class NATTProcessor extends Processor {
 	// remote address returned from server after connect if the dst is registered
 	private void adc(byte[] buf) throws IOException {
 		try{
-			SocketAddress dst = inet(buf);
+			var dst = inet(buf);
 			future.complete(dst);
 		}catch(UnknownHostException e){
 			throw new IOException(e);
@@ -207,7 +207,7 @@ public final class NATTProcessor extends Processor {
 	}
 	
 	public void register(Address address) throws IOException {
-		byte[] buf = new byte[512];
+		var buf = new byte[512];
 		protocol(buf, NetworkProtocol.NATT_PROTOCOL);
 		cmd(buf, REG);
 		address(buf, address);
@@ -219,9 +219,9 @@ public final class NATTProcessor extends Processor {
 		synchronized(obj){
 			future = new CompletableFuture<SocketAddress>();
 			try{
-				long id = random.nextLong();
+				var id = random.nextLong();
 				start = System.currentTimeMillis();
-				byte[] buf = new byte[512];
+				var buf = new byte[512];
 				protocol(buf, NetworkProtocol.NATT_PROTOCOL);
 				id(buf, id);
 				cmd(buf, CON);
@@ -235,8 +235,8 @@ public final class NATTProcessor extends Processor {
 					}
 				});
 				
-				SocketAddress dst = future.get(500, TimeUnit.MILLISECONDS);
-				boolean natted = natt(dst, id).get(5000, TimeUnit.MILLISECONDS);
+				var dst = future.get(500, TimeUnit.MILLISECONDS);
+				var natted = natt(dst, id).get(5000, TimeUnit.MILLISECONDS);
 				LOGGER.log(FINER, "NATT connect: {0} {1} {2}", new Object[]{natted, (System.currentTimeMillis() - start)});
 				return natted ? new Key(dst, id) : null;
 			}catch(Throwable e){
@@ -258,11 +258,11 @@ public final class NATTProcessor extends Processor {
 	// server side
 	private Future<Boolean> natt(byte[] buf) {
 		try{
-			SocketAddress dst = inet(buf);
-			long id = id(buf);
-			Key key = new Key(dst, id);
+			var dst = inet(buf);
+			var id = id(buf);
+			var key = new Key(dst, id);
 			LOGGER.log(FINER, "natt server: {0} {1}", new Object[]{id,dst});
-			Session session = sessions.get(key);
+			var session = sessions.get(key);
 			if(session == null){
 				session = new Session(dst, id);
 				sessions.put(key, session);
@@ -270,7 +270,7 @@ public final class NATTProcessor extends Processor {
 			}
 			return session.result();
 		}catch(Exception e){
-			CompletableFuture f = new CompletableFuture();
+			var f = new CompletableFuture<Boolean>();
 			f.completeExceptionally(e);
 			return f;
 		}
@@ -279,8 +279,8 @@ public final class NATTProcessor extends Processor {
 	// client side
 	private Future<Boolean> natt(SocketAddress dst, long id) {
 		LOGGER.log(FINER, "natt client: {0} {1}", new Object[]{id,dst});
-		Key key = new Key(dst, id);
-		Session session = sessions.get(key);
+		var key = new Key(dst, id);
+		var session = sessions.get(key);
 		if(session == null){
 			session = new Session(dst, id);
 			sessions.put(key, session);
@@ -290,7 +290,7 @@ public final class NATTProcessor extends Processor {
 	}
 	
 	private void processNATTResponse(DatagramPacket p){
-		Session session = sessions.get(new Key(p));
+		var session = sessions.get(new Key(p));
 		if(session != null && !session.future.isDone()) session.process();
 	}
 
@@ -311,7 +311,7 @@ public final class NATTProcessor extends Processor {
 	}
 	
 	private static void inet(byte[] b, SocketAddress address) {
-		InetSocketAddress inet = ((InetSocketAddress)address);
+		var inet = ((InetSocketAddress)address);
 		if(inet.getAddress() instanceof Inet6Address){
 			System.arraycopy(inet.getAddress().getAddress(), 0, b, OFF_DATA, 16);
 		}else{
@@ -346,8 +346,8 @@ public final class NATTProcessor extends Processor {
 		}else{
 			inet = extract(src, OFF_DATA, 16);
 		}
-		InetAddress add = InetAddress.getByAddress(inet);
-		int port = getInt(src, OFF_DATA + 16);
+		var add = InetAddress.getByAddress(inet);
+		var port = getInt(src, OFF_DATA + 16);
 		return new InetSocketAddress(add, port);
 	}
 	
@@ -370,7 +370,7 @@ public final class NATTProcessor extends Processor {
 			this.id = id;
 
 			key = new Key(address, id);
-			byte[] buf = new byte[9];
+			var buf = new byte[9];
 			protocol(buf, NetworkProtocol.NATT_PROTOCOL);
 			id(buf, id);
 			syn = new DatagramPacket(buf, 9, address);			
@@ -439,7 +439,7 @@ public final class NATTProcessor extends Processor {
 		@Override
 		public boolean equals(Object o){
 			if(o instanceof Key){
-				Key k = (Key)o;
+				var k = (Key)o;
 				return address.equals(k.address) && id == k.id;
 			}else{
 				return false;
