@@ -65,21 +65,21 @@ public class EndpointProviderTest {
 	@Test
 	public void testDiscovery() throws IOException, InterruptedException, Exception {
 		// discovery1
-		PublicKey key1 = KeyPairGenerator.generateKeyPair().getPublic();
-		Address address1 = new Address(key1);
-		InetSocketAddress socketAddress1 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 6888);
-		InetSocketAddress group1 = new InetSocketAddress(InetAddress.getByName("233.0.0.0"), 4769);	
-		Discovery discovery1 = new Discovery(address1, socketAddress1, group1);		
+		var key1 = KeyPairGenerator.generateKeyPair().getPublic();
+		var address1 = new Address(key1);
+		var socketAddress1 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 6888);
+		var group1 = new InetSocketAddress(InetAddress.getByName("233.0.0.0"), 4769);	
+		var discovery1 = new Discovery(address1, socketAddress1, group1);		
    	    discovery1.start();
    	    
    	    Thread.sleep(500);
    	    
    	    // discovery2
-   	    PublicKey key2 = KeyPairGenerator.generateKeyPair().getPublic();
-		Address address2 = new Address(key2);
-		InetSocketAddress socketAddress2 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 6889);
-		InetSocketAddress group2 = new InetSocketAddress(InetAddress.getByName("233.0.0.0"), 4769);		
-		Discovery discovery2 = new Discovery(address2, socketAddress2, group2);		
+   	    var key2 = KeyPairGenerator.generateKeyPair().getPublic();
+		var address2 = new Address(key2);
+		var socketAddress2 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 6889);
+		var group2 = new InetSocketAddress(InetAddress.getByName("233.0.0.0"), 4769);		
+		var discovery2 = new Discovery(address2, socketAddress2, group2);		
    	    discovery2.start();
    	    
    	    Thread.sleep(500);
@@ -103,17 +103,17 @@ public class EndpointProviderTest {
 	@Test
 	public void testLookup() throws IOException, InterruptedException, Exception {
 		// lookup server
-		int port1 = 6730;
-		InetSocketAddress lookupAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port1);
-   	    LookupServer server = new LookupServer();
+		var port1 = 6730;
+		var lookupAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port1);
+   	    var server = new LookupServer();
    	    server.start(lookupAddress);
    	    
    	    //lookup
-   	    PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
-		Address address = new Address(key);
-   	    int port2 = 6731;
-		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port2);
-		Lookup lookup = new Lookup(address, socketAddress, lookupAddress);
+   	    var key = KeyPairGenerator.generateKeyPair().getPublic();
+		var address = new Address(key);
+   	    var port2 = 6731;
+		var socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port2);
+		var lookup = new Lookup(address, socketAddress, lookupAddress);
 		
 		assertNull(lookup.lookup(address));
 		
@@ -126,20 +126,20 @@ public class EndpointProviderTest {
 	
 	@Test
 	public void testTCP() throws IOException, InterruptedException, Exception {
-		int port = 6732;
-		PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
-		Address address = new Address(key);
-		InetSocketAddress serverAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), LookupServer.SERVER_PORT);
-		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port);
-		AddressMapper mapper = AddressMapper.lookup(address, socketAddress, serverAddress);
-		EndpointProvider provider = EndpointProvider.tcp(mapper);
-		ConnectionAddress connectionAddress = new ConnectionAddress(address);
+		var port = 6732;
+		var key = KeyPairGenerator.generateKeyPair().getPublic();
+		var address = new Address(key);
+		var serverAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), LookupServer.SERVER_PORT);
+		var socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port);
+		var mapper = AddressMapper.lookup(address, socketAddress, serverAddress);
+		var provider = EndpointProvider.tcp(mapper);
+		var connectionAddress = new ConnectionAddress(address);
 		
-		LookupServer server = new LookupServer();
+		var server = new LookupServer();
    	   	server.start(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), LookupServer.SERVER_PORT));
    	   	
    	   	
-		ProviderTest test = new ProviderTest(provider, connectionAddress);
+		var test = new ProviderTest(provider, connectionAddress);
 		test.run(6732);
    	   
 		assertTrue(test.openSuccess);
@@ -149,18 +149,18 @@ public class EndpointProviderTest {
 	
 	@Test
 	public void testUDPSameAddress() throws IOException, InterruptedException, Exception {
-		int port = 6733;
-		PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
-		Address address = new Address(key);
-		InetSocketAddress serverAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), NATTServer.SERVER_PORT);
-		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port);
-		EndpointProvider provider = EndpointProvider.udp(socketAddress, address, serverAddress);		
-		ConnectionAddress connectionAddress = new ConnectionAddress(address);
+		var port = 6733;
+		var key = KeyPairGenerator.generateKeyPair().getPublic();
+		var address = new Address(key);
+		var serverAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), NATTServer.SERVER_PORT);
+		var socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port);
+		var provider = EndpointProvider.udp(socketAddress, address, serverAddress);		
+		var connectionAddress = new ConnectionAddress(address);
 		
-		NATTServer server = new NATTServer();
+		var server = new NATTServer();
    	   	server.start(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), NATTServer.SERVER_PORT));
    	   	
-		ProviderTest test = new ProviderTest(provider, connectionAddress);
+		var test = new ProviderTest(provider, connectionAddress);
 		test.run(port);
    	   
 		assertTrue(test.openSuccess);
@@ -173,27 +173,27 @@ public class EndpointProviderTest {
 	
 	@Test
 	public void testUDPDifferentAddresses() throws IOException, InterruptedException, Exception {
-		int serverPort = NATTServer.SERVER_PORT + 1;
-		int port1 = 4733;
-		int port2 = 4734;
-		PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
-		Address address1 = new Address(key);
+		var serverPort = NATTServer.SERVER_PORT + 1;
+		var port1 = 4733;
+		var port2 = 4734;
+		var key = KeyPairGenerator.generateKeyPair().getPublic();
+		var address1 = new Address(key);
 		key = KeyPairGenerator.generateKeyPair().getPublic();
-		Address address2 = new Address(key);
+		var address2 = new Address(key);
 		
-		InetSocketAddress serverAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), serverPort);
-		InetSocketAddress socketAddress1 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port1);
-		InetSocketAddress socketAddress2 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port2);
-		EndpointProvider provider1 = EndpointProvider.udp(socketAddress1, address1, serverAddress);		
-		ConnectionAddress connectionAddress1 = new ConnectionAddress(address1);
+		var serverAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), serverPort);
+		var socketAddress1 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port1);
+		var socketAddress2 = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port2);
+		var provider1 = EndpointProvider.udp(socketAddress1, address1, serverAddress);		
+		var connectionAddress1 = new ConnectionAddress(address1);
 		
-		EndpointProvider provider2 = EndpointProvider.udp(socketAddress2, address2, serverAddress);		
-		ConnectionAddress connectionAddress2 = new ConnectionAddress(address2);
+		var provider2 = EndpointProvider.udp(socketAddress2, address2, serverAddress);		
+		var connectionAddress2 = new ConnectionAddress(address2);
 		
-		NATTServer server = new NATTServer();
+		var server = new NATTServer();
    	   	server.start(serverAddress);
    	   	
-		ProviderTest2 test = new ProviderTest2(provider1, connectionAddress1, provider2, connectionAddress2);
+		var test = new ProviderTest2(provider1, connectionAddress1, provider2, connectionAddress2);
 		test.run(port1, port2);
    	   
 		assertTrue(test.openSuccess);
@@ -205,16 +205,16 @@ public class EndpointProviderTest {
 	
 	@Test
 	public void testLAN() throws IOException, InterruptedException, Exception {
-		int port = 6733;
-		PublicKey key = KeyPairGenerator.generateKeyPair().getPublic();
-		Address address = new Address(key);
-		InetSocketAddress group = EndpointProvider.defaultGroup();
-		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port);
-		AddressMapper mapper = AddressMapper.discovery(address, socketAddress, group);
-		EndpointProvider provider = EndpointProvider.tcp(mapper);	
-		ConnectionAddress connectionAddress = new ConnectionAddress(address);
+		var port = 6733;
+		var key = KeyPairGenerator.generateKeyPair().getPublic();
+		var address = new Address(key);
+		var group = EndpointProvider.defaultGroup();
+		var socketAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port);
+		var mapper = AddressMapper.discovery(address, socketAddress, group);
+		var provider = EndpointProvider.tcp(mapper);	
+		var connectionAddress = new ConnectionAddress(address);
 		
-		ProviderTest test = new ProviderTest(provider, connectionAddress);
+		var test = new ProviderTest(provider, connectionAddress);
 		test.run(port);
    	   
 		assertTrue(test.openSuccess);
@@ -245,12 +245,12 @@ public class EndpointProviderTest {
    	   void run(int port) throws IOException, InterruptedException, Exception {
    	   	   availableSignal.countDown();
    	   	   availableSignal.await(3, TimeUnit.SECONDS);
-   	   	   ServerEndpoint se = provider.server();
+   	   	   var se = provider.server();
    	   	   se.accept(this::accept);
    	   	   
-   	   	   Endpoint e = provider.open(address);
+   	   	   var e = provider.open(address);
    	   	   e.write(msg1);
-   	   	   Message msg = e.read(Message::new);
+   	   	   var msg = e.read(Message::new);
    	   	   writeSuccess = msg2.equals(msg);
    	   	   
    	   	   openSignal.await(3, TimeUnit.SECONDS);
@@ -262,7 +262,7 @@ public class EndpointProviderTest {
    	   	   		openSuccess = true;
    	   	   		
    	   	   		try {
-   	   	   			Message msg = e.read(Message::new);
+   	   	   			var msg = e.read(Message::new);
    	   	   			readSuccess = msg1.equals(msg);
    	   	   			e.write(msg2);
    	   	   		} catch(Exception ex) {
@@ -305,12 +305,12 @@ public class EndpointProviderTest {
    	   	   availableSignal.countDown();
    	   	   availableSignal.await(3, TimeUnit.SECONDS);
    	   	   
-   	   	   ServerEndpoint se = provider1.server();
+   	   	   var se = provider1.server();
    	   	   se.accept(this::accept);
    	   	   
-   	   	   Endpoint e = provider2.open(address1);
+   	   	   var e = provider2.open(address1);
    	   	   e.write(msg1);
-   	   	   Message msg = e.read(Message::new);
+   	   	   var msg = e.read(Message::new);
    	   	   writeSuccess = msg2.equals(msg);
    	   	   
    	   	   openSignal.await(3, TimeUnit.SECONDS);
@@ -322,7 +322,7 @@ public class EndpointProviderTest {
    	   	   		openSuccess = true;
    	   	   		
    	   	   		try {
-   	   	   			Message msg = e.read(Message::new);
+   	   	   			var msg = e.read(Message::new);
    	   	   			readSuccess = msg1.equals(msg);
    	   	   			e.write(msg2);
    	   	   		} catch(Exception ex) {
@@ -353,7 +353,7 @@ public class EndpointProviderTest {
    	   @Override
    	   public boolean equals(Object o) {
    	   	   if(o == null || !(o instanceof Message)) return false;
-   	   	   Message t = (Message)o;
+   	   	   var t = (Message)o;
    	   	   return txt.equals(t.txt);
    	   }
    }

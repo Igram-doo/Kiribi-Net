@@ -55,11 +55,11 @@ public class NetworkMonitorTest {
 
    @Test
    public void testOnAvailable() throws IOException, InterruptedException, Exception {
-   	   NetworkExecutor executor = new NetworkExecutor();
+   	   var executor = new NetworkExecutor();
    	   NetworkMonitor.Status[] result = new NetworkMonitor.Status[1];
-   	   Exception[] ex = new Exception[1];
-   	   CountDownLatch latch = new CountDownLatch(1);
-   	   NetworkMonitor monitor = new NetworkMonitor(executor, status -> {
+   	   var ex = new Exception[1];
+   	   var latch = new CountDownLatch(1);
+   	   var monitor = new NetworkMonitor(executor, status -> {
    	   		   result[0] = status;
    	   		   latch.countDown();
    	   });
